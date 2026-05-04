@@ -1,0 +1,11 @@
+{
+  "file_id": "848",
+  "ground_truth": "Ban đầu cũng hơi có lo lắng nhưng mà sau một thời gian thì tinh thần thì vẫn cố gắng để phục vụ cho bà con sức khỏe của bà con nhân dân ở địa bàn thành phố.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Đan đầu cũng hơi có lo lắng nhưng mà sau một thời gian thì tinh thần thì vẫn cố gắng để phục vụ cho bà con sức khỏe của bà con nhân dân ở địa bàn TP.",
+  "duration": 8.237,
+  "latency": 19.377,
+  "rtf": 2.3524
+}

@@ -1,0 +1,11 @@
+{
+  "file_id": "846",
+  "ground_truth": "Hiện nay quận có ba khu, khu thứ nhất là ở hai bảy tám hai tám tư Lãnh Binh Thăng để lưu dung những trường hợp test nhanh dương tính. Trong đó những và chúng tôi có đầu tư hệ thống máy chụp x quang di động để nhằm mục đích là đánh giá tình trạng sức khỏe, tổn thương phổi của bệnh nhân. Qua đó để chúng tôi có cái sàng lọc để đưa đi các khu khác.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Hiện nay quận có 3 khu, khu thứ nhất là ở 278, 284, Lãnh Bình Thăng để lưu dung những trường hợp tết nhanh nhân tính và trong đó chúng tôi có đầu tư hệ thống máy chụp x-quang di động để nhằm phục đích đánh giá tình trạng sức khỏe, tổn thương phổi của bệnh nhân. Qua đó để chúng tôi có sàn lọc để đưa đi các khu khác.",
+  "duration": 18.525,
+  "latency": 14.325,
+  "rtf": 0.7733
+}

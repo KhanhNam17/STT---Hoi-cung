@@ -1,0 +1,11 @@
+{
+  "file_id": "530",
+  "ground_truth": "Mấy bạn bảo không sợ, không sợ nhưng mà mình vừa vào làm lần đầu tiên mình sợ nó vãi mồ hôi rồi không dám làm. Túc tắc túc tắc từ từ làm cho đến lúc mình thành thói quen của mình thì mình cũng làm cũng bình thường, không thấy vấn đề như ngày xưa lúc mình vừa vào làm",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Mấy bạn bà không sợ, không sợ nhưng mà mình vừa vào làm lần đầu tiên mình sợ nó đãi mồ hôi ra không dám làm. Chúc tắc chúc tắc, từ từ từ làm rồi đến lúc mình bây giờ mình thành những thói quen của mình thì mình cũng làm cũng bình thường, không thấy vấn đề như ngày xưa lúc vừa vào làm.",
+  "duration": 11.379,
+  "latency": 13.814,
+  "rtf": 1.214
+}

@@ -1,0 +1,11 @@
+{
+  "file_id": "636",
+  "ground_truth": "Cũng chia sẻ thật là tôi cũng có một đứa cháu ruột Hiện tại cũng đang học cùng lớp với con gái của tôi Nhưng bạn cháu ruột của tôi thì có học lực nó chỉ ở mức độ trung bình thôi.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Cùng chia sẻ thật là tôi cũng có một đứa cháu ruột Hiện tại cũng đang học cùng lực với con gái của tôi Nhưng bàn cháu ruột của tôi thì có học lực chỉ ở mức độ trúng mình thôi",
+  "duration": 10.398,
+  "latency": 11.252,
+  "rtf": 1.0821
+}

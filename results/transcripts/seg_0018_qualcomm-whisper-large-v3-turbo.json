@@ -1,0 +1,11 @@
+{
+  "file_id": "seg_0018",
+  "ground_truth": "Và mình cảm thấy tự tin, đó là cái ngành chiếc áo vest của mình.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Và mình cảm thấy tự tin",
+  "duration": 1.301,
+  "latency": 9.628,
+  "rtf": 7.4003
+}

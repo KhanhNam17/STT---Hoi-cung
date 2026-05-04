@@ -1,0 +1,11 @@
+{
+  "file_id": "segment_012",
+  "ground_truth": "h, Tuấn chỉ biết là veston, nó là một hình ảnh, một phong cách và một thông điệp về âm nhạc Hà Anh Tuấn cảm thấy là nó phù hợp nhất trong giai đoạn này của sự nghiệp của mình.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "you",
+  "duration": 0.0,
+  "latency": 8.906,
+  "rtf": null
+}

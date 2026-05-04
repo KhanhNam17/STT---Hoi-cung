@@ -1,0 +1,11 @@
+{
+  "file_id": "525",
+  "ground_truth": "Tôi làm việc online là chính, tôi phục vụ cho những khách. Đối tượng khách của tôi là rất là kỹ tính, họ là những người, gần như là những người cổ của Hà Nội. Họ cần những trang phục của họ rất là độc đáo và không có sự mà chạm hàng với ai đó. Bởi vậy nên là hằng ngày tôi sẽ phải lên đây, tôi lựa chọn những chất liệu ở trên này để cho nó phù hợp với mẫu thiết kế của tôi. Nó khá là riêng biệt.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Tôi làm việc online là chính, tôi phục vụ cho những đối tượng khách của tôi rất là kỹ tính. Họ là những người gần như là những người cổ của Hà Nội, họ cần những trang phục của họ rất là độc đáo và không có sự chạm hàng với ai đó. Bởi vậy nên hằng ngày tôi sẽ lên đây lựa chọn những chất liệu ở trên này để cho nó phù hợp với mẫu chiếc kế của tôi. Nó khá là riêng biệt.",
+  "duration": 25.361,
+  "latency": 15.395,
+  "rtf": 0.607
+}

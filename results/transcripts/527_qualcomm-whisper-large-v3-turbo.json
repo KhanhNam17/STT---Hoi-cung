@@ -1,0 +1,11 @@
+{
+  "file_id": "527",
+  "ground_truth": "Tất cả những cái chi tiết đó cũng là một vấn đề. Nếu chỉ truyền bá lại ở cái tính chất tức là động tác này, động tác kia thì không thấm. Mà phải có những cái câu chuyện cho các cháu ở các vùng miền xa đến đây làm. Các cháu hiểu rằng đấy là một cái sự, một cái văn hóa rất đáng trân trọng của người Hà Nội.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Tất cả những chi tiết đó cũng là một vấn đề. Nếu chỉ truyền báo lại ở tính chất, tức là động tác này, động tác kia, thì không thấm. Phải có những câu chuyện cho các cháu ở các vùng miền xa đến đây làm. Các cháu hiểu rằng đấy là một văn hóa rất đáng trân trọng của người Hà Nội.",
+  "duration": 20.24,
+  "latency": 13.898,
+  "rtf": 0.6866
+}

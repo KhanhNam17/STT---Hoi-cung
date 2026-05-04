@@ -1,0 +1,11 @@
+{
+  "file_id": "segment_010",
+  "ground_truth": "nó là cả một quá trình mà mình đã quan sát và mình để dành thì Tuấn thấy cái veston đó nó là một cái kiểu, một cái solution cho mình, một cái giải tỏa để giải tỏa, để mình có",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Vestong thì nó dài và nó nhiều lắm nhưng Tuấn nghĩ là trong cuộc nói chuyện này Tuấn sẽ nói từ từ trong những câu hỏi tiếp theo của mình Tuấn chỉ biết là Vestong nó là một hình ảnh, một phong cách và một thông điệp về âm nhạc mà Hải Hành Tuấn cảm thấy là nó phù hợp nhất trong giai đoạn này của sự nghiệp của mình",
+  "duration": 19.742,
+  "latency": 14.727,
+  "rtf": 0.746
+}

@@ -1,0 +1,11 @@
+{
+  "file_id": "seg_0019",
+  "ground_truth": "Và thường thì Tuấn nghĩ là cái âm nhạc của Hà Anh Tuấn thì nó đi ra từ chính câu chuyện của bản thân.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Đó là cái ngành chiếc áo vest của mình",
+  "duration": 2.021,
+  "latency": 10.127,
+  "rtf": 5.0108
+}

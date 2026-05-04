@@ -1,0 +1,11 @@
+{
+  "file_id": "851",
+  "ground_truth": "tăng cái lượng giờ tiêm lên mặc dù tụi em rất là vất vả nhưng mà bên trong tụi em cảm thấy rất là hài lòng ở điểm là cố gắng lên để làm sao cho người dân thấy rằng lúc nào nhân viên y tế của tụi em luôn bên lòng dân hết và làm sao cho dân tin tưởng rằng nhà nước mình và địa phương mình luôn luôn tạo điều kiện để làm sao đảm bảo sức khỏe cho toàn dân.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Cảm ơn các bạn đã theo dõi và ủng hộ cho kênh lalaschool Để không bỏ lỡ những video hấp dẫn",
+  "duration": 21.78,
+  "latency": 29.469,
+  "rtf": 1.353
+}

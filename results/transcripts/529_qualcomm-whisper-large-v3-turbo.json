@@ -1,0 +1,11 @@
+{
+  "file_id": "529",
+  "ground_truth": "Đấy, khi mà bà nhận được những danh hiệu là nghệ nhân ẩm thực, rồi là người gìn giữ những di sản về văn hóa ẩm thực truyền thống thì vui lắm, cả nhà rất là vui, bà cũng rất là vui. Và cả nhà rất là tự hào khi trong gia đình lại có một người mang lại tất cả những tinh hoa của ẩm thực Việt Nam để có thể được bạn bè trong nước và thậm chí là quốc tế biết đến.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Khi mà bà nhận được những danh hiệu là nghệ nhân ẩm thực, rồi là người gìn giữ những di sản về văn hóa ẩm thực truyền thống này thì vui lắm, cả nhà rất là vui, bà cũng rất là vui. Và cả nhà rất là tự hào khi trong gia đình lại có một người mang lại tất cả những tinh hoa của ẩm thực Việt Nam để có thể được bạn bè trong nước và thậm chí là quốc tế biết đến.",
+  "duration": 27.115,
+  "latency": 15.13,
+  "rtf": 0.558
+}

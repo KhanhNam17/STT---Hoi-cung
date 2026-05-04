@@ -1,0 +1,11 @@
+{
+  "file_id": "845",
+  "ground_truth": "Nếu mà ép không thì khi mà vân nhận được thông báo là người đó có triệu chứng khó thở, Khi mà đánh giá tình trạng sơ bộ tại Việt Nam có máy ét bê ô hai để đo nồng độ oxy. Thấy thiếu thì bên trang sẽ hỗ trợ cái bình oxy vừa xuống để cho bệnh nhân thở ngay lúc đó.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Nếu mà ép không thì khi mà chăng nhận được cái thông báo là người đó có trị cũng không khó thở. Khi mà đánh giá tình trạng sơ bộ, tại vì chăng có cái máy SBO2 để ở đâu nằm oxy, thấy thiếu thì bên chăng sẽ hỗ trợ cái bệnh oxy cứ xuống để cho bệnh thở ngay lúc đó.",
+  "duration": 15.731,
+  "latency": 12.568,
+  "rtf": 0.7989
+}

@@ -1,0 +1,11 @@
+{
+  "file_id": "638",
+  "ground_truth": "Nhưng mà muốn nói rằng là để ở cái môi trường á thì tất nhiên là phụ huynh ở trong thành phố Vinh cũng như cá nhân tôi, tôi vẫn muốn là các con và các cháu của mình và tất cả các bạn học sinh là có cái học lực khá và ngoan thì được đặt chân vào cái môi trường là công lập",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Nhưng mà muốn nói rằng là để ở cái mối trường thì tất nhiên là Phù Vĩnh ở trong thành phố Vĩnh. Cùng như cả nhân tôi, tôi vẫn muốn là cả con và các cháu của mình và tất cả các bạn học chính là có cái học lực khá và ngoan thì được đặt chấn vào cái mối trường là công lập.",
+  "duration": 12.545,
+  "latency": 12.092,
+  "rtf": 0.9639
+}

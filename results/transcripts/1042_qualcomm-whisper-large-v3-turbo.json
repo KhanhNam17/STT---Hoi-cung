@@ -1,0 +1,11 @@
+{
+  "file_id": "1042",
+  "ground_truth": "định hướng thì em cũng có mở rộng thêm một số hướng chế biến khác, ví dụ như là sấy hoặc là nước ép gì đó thì em cũng đang nghiên cứu thêm, bên hợp tác xã mình cũng đang nghiên cứu thêm làm về cái sản phẩm chế biến",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Hãy subscribe cho kênh Ghiền Mì Gõ Để không bỏ lỡ những video hấp dẫn",
+  "duration": 13.251,
+  "latency": 9.472,
+  "rtf": 0.7148
+}

@@ -1,0 +1,11 @@
+{
+  "file_id": "526",
+  "ground_truth": "trong một gia đình của người Hà Nội, nó thành một nền nếp. Vậy thì bây giờ mình muốn truyền văn hóa của người Tràng An đó đến tất cả những người khách của tứ phương, thậm chí của cả thế giới. Rất nhiều khách nước ngoài đến đây. Ví dụ, một cái bát, mình chan đến độ nào là vừa, đến tầm nào là vừa để không sóng sánh ra ngoài và phải để như thế nào? Ví dụ bát, mình để vào trong cái đĩa, nó có cái đĩa kê và bê như thế nào? Bê cái khay, cái đĩa thôi. ngón tay không chạm vào miệng bát",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Trong một gia đình của người Hà Nội, nó thành một cái nền nếp. Vậy thì bây giờ mình muốn truyền cái văn hóa của người Tràng An đó đến tất cả những người khách của tứ phương, thậm chí của cả thế giới. Rất nhiều khách nước ngoài đến đây. Ví dụ một cái bát, mình chan đến độ nào là vừa, đến tầm nào là vừa để không sóng sánh ra ngoài. Hãy subscribe cho kênh Ghiền Mì Gõ Để không bỏ lỡ những video hấp dẫn",
+  "duration": 30.92,
+  "latency": 25.278,
+  "rtf": 0.8175
+}

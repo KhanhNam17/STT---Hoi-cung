@@ -1,0 +1,11 @@
+{
+  "file_id": "640",
+  "ground_truth": "Không chỉ là ở các cái thành phố lớn thì mới có, mà ở ngay tại thành phố Vinh này thì cái văn hóa phố đi bộ sẽ giúp cho mọi người có thể là lại gần nhau hơn.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Không chỉ ở các thành phố lớn thì mới có, mà ở thành phố Vinh này thì văn hóa phố đi bộ sẽ giúp cho mọi người có thể lại gần nhau hơn.",
+  "duration": 10.5,
+  "latency": 11.425,
+  "rtf": 1.0881
+}

@@ -1,0 +1,11 @@
+{
+  "file_id": "1043",
+  "ground_truth": "Nếu như cá trê vàng này thì cũng được khoảng ba hộ, bốn hộ. Tính cái giá thành năm nay thì nó cũng ổn định. Thí dụ như một vụ nuôi như vậy là cỡ khoảng năm tháng. năm tháng thì mình cũng lợi nhuận khoảng sáu bảy chục. Thì mình thấy như vậy nó cũng có lợi nhuận hơn là làm lúa.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Nếu như cá chê vàng này thì cũng được khoảng 3 hậu, 4 hậu. Tính cái giá thành năm nay thì nó cũng ổn định. Thí dụ như một vụ nuôi như vậy là khoảng 5 tháng. 5 tháng thì mình cũng lợi nhuận khoảng 6-70. Thì mình thấy như vậy nó cũng có lợi nhuận hơn làm lúa.",
+  "duration": 27.188,
+  "latency": 12.519,
+  "rtf": 0.4605
+}

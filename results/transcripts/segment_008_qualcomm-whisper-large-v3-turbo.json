@@ -1,0 +1,11 @@
+{
+  "file_id": "segment_008",
+  "ground_truth": "Veston. Nó là một cái ý niệm về một cái hình tượng. Tuấn ấp ủ từ lâu vì Tuấn nhìn quanh đi quẩn lại hình ảnh của mình, cái hình ảnh mà mình tin và mình cảm thấy tự tin. Đó là",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Hãy subscribe cho kênh Ghiền Mì Gõ Để không bỏ lỡ những video hấp dẫn",
+  "duration": 24.0,
+  "latency": 10.612,
+  "rtf": 0.4422
+}

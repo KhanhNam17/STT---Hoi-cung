@@ -1,0 +1,11 @@
+{
+  "file_id": "seg_0011",
+  "ground_truth": "Với thứ hai là khi Tuấn uống cà phê không có đường thì Tuấn enjoy được toàn bộ cái vị của nó.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "thì tùy vào thời tiết.",
+  "duration": 1.861,
+  "latency": 9.039,
+  "rtf": 4.8572
+}

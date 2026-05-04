@@ -1,0 +1,11 @@
+{
+  "file_id": "segment_007",
+  "ground_truth": "n rất là nhiều mình với cafe và Thuỳ Minh tin là những dự án sắp tới của Tuấn thì cái hình ảnh cà phê nó cũng khá là len lỏi đúng không? Nhưng mà mình sẽ nói đến cái sản phẩm gần nhất ở cái thời điểm này là ba giờ chiều ngày thứ hai thì đúng năm tiếng nữa thì cái sản phẩm âm nhạc mới nhất của Hà Anh Tuấn sẽ xuất hiện trên Youtube. Cái dự án tên là Veston. Tại sao lại là veston?",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Tại sao lại là Vestong?",
+  "duration": 25.22,
+  "latency": 9.457,
+  "rtf": 0.375
+}

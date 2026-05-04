@@ -1,0 +1,11 @@
+{
+  "file_id": "segment_000",
+  "ground_truth": "Thuỳ Minh xin chào tất cả các khán giả của Vietcetera. Trong podcast lần này, mình có một người bạn rất là đặc biệt, đặc biệt là bởi vì chơi với nhau cũng khá là lâu. Số lần phỏng vấn thì đếm trên đầu ngón tay. Xin chào mừng Hà Anh Tuấn đến với podcast lần này.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Thưa Minh, xin chào tất cả các khán giả của Vietcetera Trong podcast lần này thì mình có một người bạn rất là đặc biệt Đặc biệt là bởi vì chơi với nhau cũng khá là lâu Số lần phỏng vấn thì đếm trên đầu con tay Xin chào mừng 2 anh Tuấn đến với podcast lần này",
+  "duration": 18.54,
+  "latency": 14.238,
+  "rtf": 0.7679
+}

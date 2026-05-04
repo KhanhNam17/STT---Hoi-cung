@@ -1,0 +1,11 @@
+{
+  "file_id": "560",
+  "ground_truth": "Mấy năm trước thì bọn tôi cũng có làm cái cầu bắc sang đây để làm ăn. Theo chủ trương của xã thì bọn tôi bắc qua kênh thì nó có vi phạm. Sau được chủ trương của xã là làm cái đường nông thôn mới. Bọn tôi cũng tự nguyện đồng thuận tháo dỡ công trình.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Mấy năm trước thì bọn tôi cũng có làm cái cầu bắt sang đây để nạp ăn. Theo cái chủ trương của xã thì bọn tôi bắt qua kênh thì nó cũng có vi phạm. Sau được chủ trương của xã là làm cái đường nông thuần mới. Bọn tôi cũng tự nguyện đồng thuận tháo rỡ công trình.",
+  "duration": 27.245,
+  "latency": 13.559,
+  "rtf": 0.4977
+}

@@ -1,0 +1,11 @@
+{
+  "file_id": "524",
+  "ground_truth": "Nhà mình ở tận Hà Đông cơ Nhưng mà vì tính chất công việc mình là thợ may cho nên là phố Hàng Bồ vẫn là con phố mà gần gũi thân thiết. Cho dù xa thì mình cũng vẫn lên tận đây để mua sắm những cái thiết bị may mặc liên quan đến công việc của mình.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Nhà mình ở tận Hà Đông cơ, nhưng mà vì tính chất công việc mình là thợ may cho nên là phố Hàng Bồ vẫn là con phố gần gũi thân thiết. Cho dù xa thì mình cũng vẫn lên tận đây để mua sắm những cái thiết bị may mặc liên quan đến công việc của mình.",
+  "duration": 11.998,
+  "latency": 13.454,
+  "rtf": 1.1214
+}

@@ -1,0 +1,11 @@
+{
+  "file_id": "1049",
+  "ground_truth": "tám chỉ tiêu đề ra để mà chúng ta thực hiện cái nông thôn mới kiểu mẫu cho xã đó, đòi hỏi cái ấp thông minh đó thì chúng tôi cũng đã tập trung quyết liệt và chọn hai cái ấp để mà làm điểm ấp thông minh. Chúng tôi đang tập trung quyết liệt với cái vấn đề này. Tuy nhiên chỉ còn cái là cái cảnh quan môi trường và cái chuyển đổi chuyển đổi số trong thời gian tới thì chúng tôi cũng đã liên hệ với Sở Thông tin truyền thông.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Cám tỷ tiêu đề ra để chúng ta thực hiện nông thông mới kiểu mẫu cho xã, đòi hỏi áp thông minh thì chúng tôi cũng đã tập trung quyết liệt và chọn hai cái áp để làm điểm áp thông minh. Chúng tôi đang tập trung quyết liệt vấn đề này. Tuy nhiên chỉ còn cảnh quan môi trường và chuyển đổi số trong thời gian tới thì chúng tôi cũng đã liên hệ với Sở Thông tin Tiền Tông.",
+  "duration": 23.314,
+  "latency": 15.411,
+  "rtf": 0.661
+}

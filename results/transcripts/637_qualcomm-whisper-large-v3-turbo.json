@@ -1,0 +1,11 @@
+{
+  "file_id": "637",
+  "ground_truth": "Thì bây giờ rất là băn khoăn Sợ là cháu sẽ khó được một tấm vé đặt chân vào trường công lập Mà khi chia sẻ với tất cả mọi người là nếu như vào học mà học ở trường dân lập thì ta không nói cái môi trường, ta không chê trường nào cả Cũng là cái trường cấp ba trong thành phố Vinh cả thôi",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Bây giờ rất là bán khoán, trừ là cháu sẽ khó được một tấm vẽ và đặt chấn vào trường Công Lập. Mà khi chia sẻ với tất cả mọi người là nếu như vào học mà học ở trường Dân Lập thì ta không nói với mối trường, ta không chế trường nào cả, cũng là cái trường cấp 3 trong thành phố Vĩnh cả thôi.",
+  "duration": 13.691,
+  "latency": 25.322,
+  "rtf": 1.8495
+}

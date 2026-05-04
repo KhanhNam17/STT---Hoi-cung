@@ -1,0 +1,11 @@
+{
+  "file_id": "segment_003",
+  "ground_truth": "Đấy cũng là một phần bởi vì mình bị nói nhiều là đường không tốt vì mình đã ăn đủ ngọt rồi, mình uống cà phê thì không nên thêm nữa. Thứ hai là khi uống cà phê không có đường thì Tuấn, Tuấn, Tuấn enjoy được toàn bộ cái vị của nó rất thích, thích lắm. [Host Thuỳ Minh]: Hôm nay thì mời Tuấn một ly cà phê. Có đường chứ. Có đường. [Host Thuỳ Minh]: Có đường, có một chút đường. Nhưng mà chúng tôi đang nói chuyện vào buổi chiều. Với những người uống cà phê có đường, có muối.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Đấy cũng là một phần bởi vì mình bị nói nhiều là đường thì không tốt Với mình đã ăn đủ ngọt rồi thì khi mình uống cà phê mình không nên thêm nữa Với thứ hai là khi Tuấn uống cà phê không có đường thì Tuấn enjoy được toàn bộ cái vị của nó Rất thích, thích lắm Hôm nay thì mời Tuấn một cái ly cà phê có đường chứ Có đường à Có đường, có một chút đường Nhưng mà chúng tôi đang nói chuyện vào buổi chiều Với những người hay uống cà phê, có đường có muối",
+  "duration": 27.9,
+  "latency": 16.858,
+  "rtf": 0.6042
+}

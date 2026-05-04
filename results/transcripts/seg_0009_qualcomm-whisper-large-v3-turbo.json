@@ -1,0 +1,11 @@
+{
+  "file_id": "seg_0009",
+  "ground_truth": "Đấy cũng là một phần bởi vì mình bị nói nhiều là đường thì không tốt.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "I think it's a very important thing.",
+  "duration": 1.381,
+  "latency": 8.921,
+  "rtf": 6.4601
+}

@@ -1,0 +1,11 @@
+{
+  "file_id": "1050",
+  "ground_truth": "Thời gian qua thì nổi bật nhất là cái tiêu chí về cái xây dựng giao thông nông thôn thì thời gian qua thì xã cũng được huyện quan tâm đầu tư mở rộng các cái hệ thống giao thông nông thôn rồi bên cạnh đó thì xã cũng có được sự quan tâm rồi có các mạnh thường quân doanh nghiệp bên ngoài cũng đã quan tâm tới địa phương cũng đã hỗ trợ kinh phí cho địa phương xây dựng cầu đường.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Thời gian qua thì nổi bật nhất là tiêu chí về xây dựng giao thông nông thôn. Thời gian qua thì xã cũng được quyện quan tâm, đầu tư, mở rộng các hệ thống giao thông nông thôn. Bên cạnh đó thì xã cũng được sự quan tâm, có các mạnh thường quân, doanh nghiệp bên ngoài cũng đã quan tâm tới địa phương, cũng đã hỗ trợ kinh phí cho địa phương xây dựng cầu đường.",
+  "duration": 29.082,
+  "latency": 15.397,
+  "rtf": 0.5294
+}

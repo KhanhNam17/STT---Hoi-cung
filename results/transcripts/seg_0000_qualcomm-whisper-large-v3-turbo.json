@@ -1,0 +1,11 @@
+{
+  "file_id": "seg_0000",
+  "ground_truth": "Thì mình xin chào tất cả các khán giả của Vietcetera Trong podcast lần này thì mình có một người bạn rất là đặc biệt Đặc biệt là bởi vì chơi với nhau cũng khá là lâu Số lần phỏng vấn thì đếm trên đầu con tay Xin chào mừng hai anh Tuấn đến với podcast lần này",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Thưa Minh, xin chào tất cả các khán giả của Vietcetera Trong podcast lần này thì mình có một kính phần",
+  "duration": 5.162,
+  "latency": 10.423,
+  "rtf": 2.0192
+}

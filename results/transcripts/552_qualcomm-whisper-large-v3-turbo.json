@@ -1,0 +1,11 @@
+{
+  "file_id": "552",
+  "ground_truth": "Bạn Quốc Vinh của lớp mình là một học sinh rất là chăm ngoan, lễ phép với thầy cô giáo. Trong tất cả các giờ học thì bạn Vinh đều rất là say sưa học tập. Dù kiến thức đó bạn Vinh có thể đã nắm bắt được trên các giờ học đội tuyển, nhưng mà bạn Vinh rất là khiên tốm.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Đảng Quốc Vinh của lớp mình là một học sinh rất là trong ngoan, lễ phép với thầy cô giáo. Trong tất cả các giờ học thì bạn Vinh đều rất là xoay xưa học tập. Dù kiến thức đó bạn Vinh có thể đã nắm bắt được trên các giờ học đội tuyển, nhưng mà bạn Vinh rất là khiên tốn.",
+  "duration": 16.8,
+  "latency": 33.282,
+  "rtf": 1.9811
+}

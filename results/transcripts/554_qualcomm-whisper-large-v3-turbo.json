@@ -1,0 +1,11 @@
+{
+  "file_id": "554",
+  "ground_truth": "Nói chung là thuận lợi cái là riêng cái bưởi nó không như vải, bưởi thì thu hoạch dài ngày, ví dụ như thu từ tháng mười, à tháng bảy đến tháng mười. Thế như nhà mình thì đường nó tiện, đường thì nó ô tô vào tận sân lấy được và thương lái người ta tự lấy lấy. Thế những quả mà to mà đạt tiêu chuẩn thì mình bán trước, còn những quả ấy thì mình để lại mình bán sau.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Nói chung là thuận lợi là riêng cái bữa ấy nó không như vải. Bữa ấy thì thu hoạch dài ngày, ví dụ như thu từ tháng 7 đến năm 10. Như nhà mình thì đường nó tiện, đường thì nó ô tô và tận sân lấy được và thương lái người ta tự lấy lấy. Những quả mà to mà đạt tiêu chuẩn thì mình văn trước, còn những quả lấy thì mình để lại văn sau.",
+  "duration": 17.97,
+  "latency": 41.833,
+  "rtf": 2.3279
+}

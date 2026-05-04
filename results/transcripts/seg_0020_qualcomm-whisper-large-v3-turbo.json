@@ -1,0 +1,11 @@
+{
+  "file_id": "seg_0020",
+  "ground_truth": "Nó không phải chỉ là ở thời điểm này, nhưng nó là cả một cái quá trình mà mình đã quan sát và mình đề giảnh.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Và thường thì",
+  "duration": 2.161,
+  "latency": 9.632,
+  "rtf": 4.4572
+}

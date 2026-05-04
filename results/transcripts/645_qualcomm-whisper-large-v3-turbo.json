@@ -1,0 +1,11 @@
+{
+  "file_id": "645",
+  "ground_truth": "Đây là cái xu hướng tất yếu và phù hợp với cái xu thế là phát triển của kinh tế thị trường và tốc độ phát triển kinh tế xã hội của tỉnh nghệ an các địa phương để rà soát, xây dựng các quy hoạch định hướng phát triển hệ thống hạ tầng thương mại dịch vụ.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Đây là chú hưởng tất yếu và phù hợp với chú thể phát triển của kinh tế thị trường và tốc độ phát triển kinh tế sâu của tỉnh, các địa phương ra soát, xây dựng các quy hoạch đình hướng phát triển hệ thống hóa thân thương mại dịch vụ.",
+  "duration": 17.835,
+  "latency": 13.699,
+  "rtf": 0.7681
+}

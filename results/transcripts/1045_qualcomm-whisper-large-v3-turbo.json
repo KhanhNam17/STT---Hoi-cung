@@ -1,0 +1,11 @@
+{
+  "file_id": "1045",
+  "ground_truth": "tuyến đường thị xã cũng đã đầu tư cái tuyến đường Ấp Tân Thạnh, Cua Bắc Trăng này ;à tổng số tiền là một hơn một tỷ, trong đó nhà nước hỗ trợ tám trăm, còn lại là nhân dân đóng góp. Thì cái tuyến đường này cũng đã góp cho, góp phần cho bà con là thuận tiện trong cái việc mà xe lưu thông hàng hóa cũng như chở vận chuyển rất may thì Nó rất là thuận tiện trong việc vận chuyển mua bán.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Tiếng đường hị xã cũng đã đầu tư tiến đường ấp Văn Thạnh, Cú Bắc Trăng này tổng số tiền là hơn 1 tỷ, trong đó là nhà nước hỗ trợ 800, còn lại là nhân dân đóng góp. Tiếng đường này cũng đã góp phần cho bà con là thuận tiện trong việc xe lưu thông hàng hóa cũng như là chở vận chuyển các mai, nó rất là thuận tiện trong việc vận chuyển mua bán.",
+  "duration": 23.006,
+  "latency": 15.251,
+  "rtf": 0.6629
+}

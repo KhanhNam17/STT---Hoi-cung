@@ -1,0 +1,11 @@
+{
+  "file_id": "segment_013",
+  "ground_truth": "Veston. Nó là một cái ý niệm về một cái hình tượng. Tuấn ấp ủ từ lâu vì Tuấn nhìn quanh đi quẩn lại hình ảnh của mình, cái hình ảnh mà mình tin và mình cảm thấy tự tin. Đó là hình ảnh chiếc áo vest của mình. Và thường thì Tuấn nghĩ là âm nhạc của Hà Anh Tuấn thì nó đi ra từ chính câu chuyện của bản thân. Nó không phải chỉ là ở thời điểm này, nhưng nó là cả một quá trình mà mình đã quan sát và mình để dành thì Tuấn thấy cái veston đó nó là một cái kiểu, một cái solution cho mình, một cái giải tỏa để giải tỏa, để mình có cớ. Mình làm dự án âm nhạc mới. Để nói về cái veston thì nó dài và nó nhiều lắm. Tuấn nghĩ là trong cuộc nói chuyện này Tuấn sẽ nói từ từ trong những câu hỏi tiếp theo của mình, Tuấn chỉ biết là veston, nó là một hình ảnh, một phong cách và một thông điệp về âm nhạc Hà Anh Tuấn cảm thấy là nó phù hợp nhất trong giai đoạn này của sự nghiệp của mình.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Cái hình ảnh mà mình tin, mà mình cảm thấy tự tin, đó là cái hình ảnh chiếc áo vest của mình. Và thường thì Tuấn nghĩ là cái âm nhạc của Hà Hình Tuấn thì nó đi ra từ chính câu chuyện của bản thân. Nó không phải chỉ là ở thời điểm này, nhưng nó là cả một cái quá trình mà mình đã...",
+  "duration": 20.0,
+  "latency": 14.113,
+  "rtf": 0.7056
+}

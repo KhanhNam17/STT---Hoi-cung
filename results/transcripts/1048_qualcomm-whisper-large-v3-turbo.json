@@ -1,0 +1,11 @@
+{
+  "file_id": "1048",
+  "ground_truth": "Đầu tư những cái cơ sở hạ tầng kỹ thuật cũng như hạ tầng xã hội, và đặc biệt là những cái hộ nghèo, những cái bảo hiểm y tế, bảo hiểm xã hội và các cái tổ chức phát triển sản xuất và giáo dục. Tới thời điểm này thì chúng tôi chỉ còn chờ là uỷ ban nhân dân thành phố ra quyết định công nhận bốn xã nêu trên của huyện thới lai.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Hãy subscribe cho kênh Ghiền Mì Gõ Để không bỏ lỡ những video hấp dẫn",
+  "duration": 22.63,
+  "latency": 10.365,
+  "rtf": 0.458
+}

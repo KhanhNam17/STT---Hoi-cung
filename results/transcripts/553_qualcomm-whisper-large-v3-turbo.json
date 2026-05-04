@@ -1,0 +1,11 @@
+{
+  "file_id": "553",
+  "ground_truth": "Đối với bạn bè thì bạn Vinh rất là hòa đồng và luôn luôn có ý thức giúp đỡ các bạn trong lớp học. Một cái điểm mà mình thấy ở Vinh đáng yêu nhất đó là một cái thái độ thực sự là cầu tiến và say mê với môn học, với tất cả các môn học và đặc biệt là môn toán của mình.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Đối với bạn Về thì bạn Vinh rất là hòa đồng và luôn luôn có ý thức giúp đỡ các bạn trong lớp học. Một cái điểm mà mình thấy ở Vinh đáng yêu nhất đó là một cái thái độ thực sự là cầu tiến và say mê với môn học, với tất cả các môn học và đặc biệt là môn toán của mình.",
+  "duration": 17.211,
+  "latency": 38.822,
+  "rtf": 2.2557
+}

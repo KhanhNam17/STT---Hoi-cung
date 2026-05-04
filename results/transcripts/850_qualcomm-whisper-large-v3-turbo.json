@@ -1,0 +1,11 @@
+{
+  "file_id": "850",
+  "ground_truth": "Đảm bảo tất cả cuộc gọi về số một một năm phải được đáp ứng, ít nhất là chúng ta nghe. Và trong cái tổng đài đó chia ra từng cái tổ. Tổ điều phối ép không nhẹ không chịu chứng, tổ điều phối ép không nặng, tổ điều phối hỗ trợ cho taxi và nó sẽ phát sinh thêm một số những cái chức năng nhiệm vụ nữa.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Đảm bảo tất cả cuộc gọi về số 115 phải được đáp ứng. Và trong cái tổng đài đó chia ra từng cái tổ, tổ điều phối F0 nhẹ, không chịu chứng, tổ điều phối F0 nặng, tổ điều phối hỗ trợ cho taxi và nó sẽ phát sinh thêm một số những cái chức năng nhiệm vụ nữa.",
+  "duration": 17.324,
+  "latency": 38.895,
+  "rtf": 2.2452
+}

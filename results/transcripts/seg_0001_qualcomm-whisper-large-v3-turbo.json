@@ -1,0 +1,11 @@
+{
+  "file_id": "seg_0001",
+  "ground_truth": "Rất là khó để nhận lời phỏng vấn mà lại là một người bạn thân bởi vì hai anh Tuấn nghĩ rằng là để mà mình trả lời câu hỏi thì nó không khó nhưng mà để chọn thái độ",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Chào Minh, chào Vis-Say-Tara, Đọc Thể Phật.",
+  "duration": 3.263,
+  "latency": 9.236,
+  "rtf": 2.8306
+}

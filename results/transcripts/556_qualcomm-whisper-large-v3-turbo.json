@@ -1,0 +1,11 @@
+{
+  "file_id": "556",
+  "ground_truth": "Qua quá trình nghiên cứu, thảo luận và đánh giá sách giáo khoa lớp bốn thì nhà trường đã lựa chọn bộ sách cánh diều để đưa vào sử dụng và đối với tổ chuyên môn đã thực hiện nghiêm túc mọi công việc để theo cái quy trình đánh giá và lựa chọn sách giáo khoa mà bộ giáo dục và ủy ban nhân dân tỉnh đã triển khai.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Qua quá trình nghiên cứu, thảo luận và đánh giá sách giáo khoa nước 4, nhà trường đã lựa chọn bộ sách cánh diều để đưa vào sử dụng. Và đối với tổ chuyên môn đã thực hiện nghiêm túc mọi công việc để theo quy trình đánh giá và lựa chọn sách giáo khoa mà Bộ Giáo dục và Ủy ban Nhân dân tỉnh đã triển khai.",
+  "duration": 26.118,
+  "latency": 40.214,
+  "rtf": 1.5397
+}

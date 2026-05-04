@@ -1,0 +1,299 @@
+{
+  "speaker": "Khánh Vy",
+  "total_duration": 330.81,
+  "n_turns": 17,
+  "sliding_windows": 12,
+  "original_turns": [
+    {
+      "start": 1.7,
+      "end": 6.44,
+      "duration": 4.74,
+      "speaker": "Khánh Vy",
+      "text": "Em cảm ơn chị Thùy Minh và cảm ơn các khán giả của Have a Sip. Em cảm ơn chị đã mời em."
+    },
+    {
+      "start": 36.23,
+      "end": 44.09,
+      "duration": 7.86,
+      "speaker": "Khánh Vy",
+      "text": "Em lúc đấy cũng đang băn khoăn là không biết mình có nên nhắn không nữa. May mà người ta không cần mình nữa thì mình nhắn, người ta từ chối thì cũng ngại. Nhưng mà thôi."
+    },
+    {
+      "start": 71.94,
+      "end": 93.54,
+      "duration": 21.6,
+      "speaker": "Khánh Vy",
+      "text": "Bởi vì trước khi em đi dẫn em đi nói mà em sử dụng giọng nói thì em sẽ hầu hết là không uống những thứ nước có vị như là trà hay là cafe hay là các nước khác. Mà em sẽ chỉ tập trung vào nước lọc. Thêm nữa là hôm qua em hơi bị trúng thực nên là thêm mật ong nữa cho nó khỏi bụng. Và khi nào mà làm xong thì em mới thưởng cho bản thân mình uống các nước có vị."
+    },
+    {
+      "start": 95.46,
+      "end": 112.92,
+      "duration": 17.46,
+      "speaker": "Khánh Vy",
+      "text": "Em nghĩ là từ cái thời điểm em bắt đầu theo hướng MC chuyên nghiệp, tức là em rất là thích uống trà bưởi đá rồi. Em rất là thích uống cà phê, nhưng mà em nhận ra là cứ mỗi lần em uống mấy cái đấy thì giọng em nó không được một trăm phần trăm. Tốt lắm. Nên em nghĩ là kệ, cứ sáng sớm hay là ngày nào đi làm là cứ uống nước lọc thôi."
+    },
+    {
+      "start": 129.76,
+      "end": 145.27,
+      "duration": 15.51,
+      "speaker": "Khánh Vy",
+      "text": "Em là kiểu người đầu chị nói ạ. Tức là em phải có một mục tiêu rõ ràng, cụ thể thấy trước mắt rồi em mới bắt đầu lên danh sách chứ thực ra để mà nói là trước khi làm em, khi mà em chỉ uống nước lọc cho họng là không có. Bởi vì tuổi vẫn còn rất nhiều chấp niệm, mong muốn là mình được làm cái này cái kia, nên là."
+    },
+    {
+      "start": 171.25,
+      "end": 210.05,
+      "duration": 38.8,
+      "speaker": "Khánh Vy",
+      "text": "Thực ra thì câu chuyện uống nước lọc của em là từ cái thời điểm mà em bị mụn, đấy là mặt em bị breakout, bị mụn liên tục và tới mức mà em đeo khẩu trang đi học mấy tháng liền sau, các anh chị ở trường đại học bảo là cô bé này mới nổi tí mà chưa gì đã kêu đeo khẩu trang, làm như kiểu nó là sao celeb ấy. Thì em nghĩ là em phải thay đổi cái lối sống của em về ăn uống của em, phải thay đổi. Cái đoàn thực của em rất là nhiều nên em uống nước lọc là theo thói quen, từ đó em uống rất là nhiều nước lọc. Còn khi mà bắt đầu vào MC thì em mới nghiêm túc nghĩ rằng là mình nên tạm thời để những cái thức uống ngon bên cạnh để mình tập trung vào nước lọc để uống cho tốt."
+    },
+    {
+      "start": 223.64,
+      "end": 247.63,
+      "duration": 23.99,
+      "speaker": "Khánh Vy",
+      "text": "Thì cũng có một số người hỏi nhưng mà thực ra em thấy là thành công. Chỉ là em thấy có hai khái niệm chỉ mang tính thời điểm thôi, đó là thành công và hạnh phúc. Có những thời điểm mình nghĩ là mình làm được, nhưng sẽ có những thời điểm mình sẽ không làm được. Nói chung đấy là một chuyện rất là bình thường. Và mới đây em có đọc một cái bài sau em nghe một cái nội dung về thành công mà em thấy cũng rất là tâm đắc, đó là anh host ấy hỏi cái bác đấy là theo."
+    },
+    {
+      "start": 250.06,
+      "end": 250.93,
+      "duration": 0.87,
+      "speaker": "Khánh Vy",
+      "text": "Người nước ngoài em."
+    },
+    {
+      "start": 250.93,
+      "end": 271.99,
+      "duration": 21.06,
+      "speaker": "Khánh Vy",
+      "text": "Lướt lướt thôi. Sau hỏi là Bác ơi, theo bác định nghĩa thành công của bác là gì? Mà bác cũng tầm khoảng năm mươi, sáu mươi rồi sao bác nói là định nghĩa thành công của tôi là khi tôi về già và con tôi khi lớn mà vẫn muốn chia sẻ cuộc sống của nó với tôi, và khi tôi về già thì bao nhiêu người sẽ tiếp tục đến với tôi thay vì đến những chỗ khác. Em thấy...wow, em sẽ lấy cái này làm kim chỉ nam."
+    },
+    {
+      "start": 281.08,
+      "end": 305.83,
+      "duration": 24.75,
+      "speaker": "Khánh Vy",
+      "text": "Tức là để nhìn lại, nếu mà kể về quá trình mình sống với mình, để cho người ta cảm giác gì, mình làm cho người khác cái gì thì để đến khi mình già rồi. Bởi vì người ta hay nghĩ là tuổi già rồi thì đôi khi họ không có quá nhiều năng lượng hay sự cống hiến như những lứa tuổi khác thì em nghĩ đấy cũng là một điều để mình cố gắng sống cho tới khi nào mình già đi và mình vẫn có thể tạo được cảm xúc tốt cho người khác."
+    },
+    {
+      "start": 313.42,
+      "end": 325.3,
+      "duration": 11.88,
+      "speaker": "Khánh Vy",
+      "text": "Thực ra là cũng từ cái lúc mà em em em nhận thấy là em là con út và bố mẹ em càng ngày càng già nên em rất là rất là để ý về cái vấn đề tuổi tác."
+    },
+    {
+      "start": 331.33,
+      "end": 354.64,
+      "duration": 23.31,
+      "speaker": "Khánh Vy",
+      "text": "Bố mẹ em thì em không muốn nói đến số tuổi. Em nghĩ là tầm, chắc là bố chắc gần bảy chục. Nhưng mà thực sự với em, bố em cũng không bao giờ nghĩ về tuổi bố quá nhiều. Em chỉ nghĩ là bố có nhiều kiến thức về kinh nghiệm cho em thôi. Mà em cũng không muốn nghĩ về cái vấn đề đấy, bởi vì em nghĩ là bởi vì khi mình sinh ra thì bố mẹ mình đã có tuổi rồi. Cho nên là."
+    },
+    {
+      "start": 401.75,
+      "end": 460.59,
+      "duration": 58.84,
+      "speaker": "Khánh Vy",
+      "text": "Bố mẹ em ở nhà à? Thực ra là bố mẹ em phát hiện được là em có năng khiếu học ngoại ngữ từ bé, từ hồi mẫu giáo là em hay kiểu xem phim kiếm hiệp rồi kiểu là khoáng sang, nhõng nhẽo suốt ngày kiểu bình thân. Bính Trần hoảng sợ. Em luôn luôn là nói mấy cái đấy rồi xem phim Hàn như Nấc thang lên thiên đường, trái tim mùa thu. Mà cái thời điểm đấy là chị gái em học cấp ba các thứ nên là em còn nhỏ, em đã tiếp xúc mấy cái đấy và em hay nói nhại thì cho tới năm cấp một thì mẹ em nghĩ là có một cái trung tâm tiếng Anh lần đầu tiên xuất hiện tại thành phố Vinh quê em. Mẹ em nói thì mẹ đưa con đi học ở đấy xong em đi học và được phát triển cái khả năng ngoại ngữ của mình. Còn về cái vấn đề mà em làm công việc thì bố mẹ em là luôn luôn ủng hộ em và dù em làm cái gì thì bố mẹ em cũng ủng hộ em, Miễn là Miễn là em làm cái gì đó tốt đẹp cho người khác là được và tốt đẹp cho mình phát triển là được."
+    },
+    {
+      "start": 476.91,
+      "end": 520.45,
+      "duration": 43.54,
+      "speaker": "Khánh Vy",
+      "text": "Em có nghĩ cái đấy? Mới đây thì em xem clip của chị Thủy Tiên với chị xong em với bố cùng xem thì bố em nói đỉnh thật đấy. Sao có đứa nó sinh ra hoàn cảnh nó thế mà nó thành công mà nó giỏi, IQ, EQ đều cao. Em cũng nghĩ là thực ra cái phần lớn về cái tư tưởng, định hướng của em là được gia đình giúp định hướng rất là nhiều. Nhưng mà em cảm giác là cái tính của em khi mà sinh ra là đã rất là nhiều năng lượng và kiểu đã rất là thích nói chuyện với người khác quảng giao nên em nghĩ là em sẽ vẫn có thể thực hiện hóa được những cái ước mơ của mình dựa trên khía cạnh đó của mình."
+    },
+    {
+      "start": 524.02,
+      "end": 524.98,
+      "duration": 0.96,
+      "speaker": "Khánh Vy",
+      "text": "Cung Sư Tử."
+    },
+    {
+      "start": 532.75,
+      "end": 533.14,
+      "duration": 0.39,
+      "speaker": "Khánh Vy",
+      "text": "Em rất là hợp Thiên Bình."
+    },
+    {
+      "start": 556.13,
+      "end": 567.98,
+      "duration": 11.85,
+      "speaker": "Khánh Vy",
+      "text": "Thực ra là em định cứ cuối một năm 31 tháng 12 là em sẽ làm một video clip thì em cũng làm được trong vòng năm rồi. Em cũng làm trong vòng ba năm rồi. Nhưng mà đây là cái hình thức nhiều khi nó cũng thấy được thay đổi một tí."
+    }
+  ],
+  "concat_turns": [
+    {
+      "start": 1.7,
+      "end": 6.44,
+      "duration": 4.74,
+      "speaker": "Khánh Vy",
+      "text": "Em cảm ơn chị Thùy Minh và cảm ơn các khán giả của Have a Sip. Em cảm ơn chị đã mời em.",
+      "concat_start": 0.0,
+      "concat_end": 4.94,
+      "concat_dur": 4.94
+    },
+    {
+      "start": 36.23,
+      "end": 44.09,
+      "duration": 7.86,
+      "speaker": "Khánh Vy",
+      "text": "Em lúc đấy cũng đang băn khoăn là không biết mình có nên nhắn không nữa. May mà người ta không cần mình nữa thì mình nhắn, người ta từ chối thì cũng ngại. Nhưng mà thôi.",
+      "concat_start": 4.94,
+      "concat_end": 13.0,
+      "concat_dur": 8.06
+    },
+    {
+      "start": 71.94,
+      "end": 93.54,
+      "duration": 21.6,
+      "speaker": "Khánh Vy",
+      "text": "Bởi vì trước khi em đi dẫn em đi nói mà em sử dụng giọng nói thì em sẽ hầu hết là không uống những thứ nước có vị như là trà hay là cafe hay là các nước khác. Mà em sẽ chỉ tập trung vào nước lọc. Thêm nữa là hôm qua em hơi bị trúng thực nên là thêm mật ong nữa cho nó khỏi bụng. Và khi nào mà làm xong thì em mới thưởng cho bản thân mình uống các nước có vị.",
+      "concat_start": 13.0,
+      "concat_end": 34.8,
+      "concat_dur": 21.8
+    },
+    {
+      "start": 95.46,
+      "end": 112.92,
+      "duration": 17.46,
+      "speaker": "Khánh Vy",
+      "text": "Em nghĩ là từ cái thời điểm em bắt đầu theo hướng MC chuyên nghiệp, tức là em rất là thích uống trà bưởi đá rồi. Em rất là thích uống cà phê, nhưng mà em nhận ra là cứ mỗi lần em uống mấy cái đấy thì giọng em nó không được một trăm phần trăm. Tốt lắm. Nên em nghĩ là kệ, cứ sáng sớm hay là ngày nào đi làm là cứ uống nước lọc thôi.",
+      "concat_start": 34.8,
+      "concat_end": 52.46,
+      "concat_dur": 17.66
+    },
+    {
+      "start": 129.76,
+      "end": 145.27,
+      "duration": 15.51,
+      "speaker": "Khánh Vy",
+      "text": "Em là kiểu người đầu chị nói ạ. Tức là em phải có một mục tiêu rõ ràng, cụ thể thấy trước mắt rồi em mới bắt đầu lên danh sách chứ thực ra để mà nói là trước khi làm em, khi mà em chỉ uống nước lọc cho họng là không có. Bởi vì tuổi vẫn còn rất nhiều chấp niệm, mong muốn là mình được làm cái này cái kia, nên là.",
+      "concat_start": 52.46,
+      "concat_end": 68.17,
+      "concat_dur": 15.71
+    },
+    {
+      "start": 171.25,
+      "end": 210.05,
+      "duration": 38.8,
+      "speaker": "Khánh Vy",
+      "text": "Thực ra thì câu chuyện uống nước lọc của em là từ cái thời điểm mà em bị mụn, đấy là mặt em bị breakout, bị mụn liên tục và tới mức mà em đeo khẩu trang đi học mấy tháng liền sau, các anh chị ở trường đại học bảo là cô bé này mới nổi tí mà chưa gì đã kêu đeo khẩu trang, làm như kiểu nó là sao celeb ấy. Thì em nghĩ là em phải thay đổi cái lối sống của em về ăn uống của em, phải thay đổi. Cái đoàn thực của em rất là nhiều nên em uống nước lọc là theo thói quen, từ đó em uống rất là nhiều nước lọc. Còn khi mà bắt đầu vào MC thì em mới nghiêm túc nghĩ rằng là mình nên tạm thời để những cái thức uống ngon bên cạnh để mình tập trung vào nước lọc để uống cho tốt.",
+      "concat_start": 68.17,
+      "concat_end": 107.17,
+      "concat_dur": 39.0
+    },
+    {
+      "start": 223.64,
+      "end": 247.63,
+      "duration": 23.99,
+      "speaker": "Khánh Vy",
+      "text": "Thì cũng có một số người hỏi nhưng mà thực ra em thấy là thành công. Chỉ là em thấy có hai khái niệm chỉ mang tính thời điểm thôi, đó là thành công và hạnh phúc. Có những thời điểm mình nghĩ là mình làm được, nhưng sẽ có những thời điểm mình sẽ không làm được. Nói chung đấy là một chuyện rất là bình thường. Và mới đây em có đọc một cái bài sau em nghe một cái nội dung về thành công mà em thấy cũng rất là tâm đắc, đó là anh host ấy hỏi cái bác đấy là theo.",
+      "concat_start": 107.17,
+      "concat_end": 131.36,
+      "concat_dur": 24.19
+    },
+    {
+      "start": 250.06,
+      "end": 250.93,
+      "duration": 0.87,
+      "speaker": "Khánh Vy",
+      "text": "Người nước ngoài em.",
+      "concat_start": 131.36,
+      "concat_end": 132.43,
+      "concat_dur": 1.07
+    },
+    {
+      "start": 250.93,
+      "end": 271.99,
+      "duration": 21.06,
+      "speaker": "Khánh Vy",
+      "text": "Lướt lướt thôi. Sau hỏi là Bác ơi, theo bác định nghĩa thành công của bác là gì? Mà bác cũng tầm khoảng năm mươi, sáu mươi rồi sao bác nói là định nghĩa thành công của tôi là khi tôi về già và con tôi khi lớn mà vẫn muốn chia sẻ cuộc sống của nó với tôi, và khi tôi về già thì bao nhiêu người sẽ tiếp tục đến với tôi thay vì đến những chỗ khác. Em thấy...wow, em sẽ lấy cái này làm kim chỉ nam.",
+      "concat_start": 132.43,
+      "concat_end": 153.69,
+      "concat_dur": 21.26
+    },
+    {
+      "start": 281.08,
+      "end": 305.83,
+      "duration": 24.75,
+      "speaker": "Khánh Vy",
+      "text": "Tức là để nhìn lại, nếu mà kể về quá trình mình sống với mình, để cho người ta cảm giác gì, mình làm cho người khác cái gì thì để đến khi mình già rồi. Bởi vì người ta hay nghĩ là tuổi già rồi thì đôi khi họ không có quá nhiều năng lượng hay sự cống hiến như những lứa tuổi khác thì em nghĩ đấy cũng là một điều để mình cố gắng sống cho tới khi nào mình già đi và mình vẫn có thể tạo được cảm xúc tốt cho người khác.",
+      "concat_start": 153.69,
+      "concat_end": 178.64,
+      "concat_dur": 24.95
+    },
+    {
+      "start": 313.42,
+      "end": 325.3,
+      "duration": 11.88,
+      "speaker": "Khánh Vy",
+      "text": "Thực ra là cũng từ cái lúc mà em em em nhận thấy là em là con út và bố mẹ em càng ngày càng già nên em rất là rất là để ý về cái vấn đề tuổi tác.",
+      "concat_start": 178.64,
+      "concat_end": 190.72,
+      "concat_dur": 12.08
+    },
+    {
+      "start": 331.33,
+      "end": 354.64,
+      "duration": 23.31,
+      "speaker": "Khánh Vy",
+      "text": "Bố mẹ em thì em không muốn nói đến số tuổi. Em nghĩ là tầm, chắc là bố chắc gần bảy chục. Nhưng mà thực sự với em, bố em cũng không bao giờ nghĩ về tuổi bố quá nhiều. Em chỉ nghĩ là bố có nhiều kiến thức về kinh nghiệm cho em thôi. Mà em cũng không muốn nghĩ về cái vấn đề đấy, bởi vì em nghĩ là bởi vì khi mình sinh ra thì bố mẹ mình đã có tuổi rồi. Cho nên là.",
+      "concat_start": 190.72,
+      "concat_end": 214.23,
+      "concat_dur": 23.51
+    },
+    {
+      "start": 401.75,
+      "end": 460.59,
+      "duration": 58.84,
+      "speaker": "Khánh Vy",
+      "text": "Bố mẹ em ở nhà à? Thực ra là bố mẹ em phát hiện được là em có năng khiếu học ngoại ngữ từ bé, từ hồi mẫu giáo là em hay kiểu xem phim kiếm hiệp rồi kiểu là khoáng sang, nhõng nhẽo suốt ngày kiểu bình thân. Bính Trần hoảng sợ. Em luôn luôn là nói mấy cái đấy rồi xem phim Hàn như Nấc thang lên thiên đường, trái tim mùa thu. Mà cái thời điểm đấy là chị gái em học cấp ba các thứ nên là em còn nhỏ, em đã tiếp xúc mấy cái đấy và em hay nói nhại thì cho tới năm cấp một thì mẹ em nghĩ là có một cái trung tâm tiếng Anh lần đầu tiên xuất hiện tại thành phố Vinh quê em. Mẹ em nói thì mẹ đưa con đi học ở đấy xong em đi học và được phát triển cái khả năng ngoại ngữ của mình. Còn về cái vấn đề mà em làm công việc thì bố mẹ em là luôn luôn ủng hộ em và dù em làm cái gì thì bố mẹ em cũng ủng hộ em, Miễn là Miễn là em làm cái gì đó tốt đẹp cho người khác là được và tốt đẹp cho mình phát triển là được.",
+      "concat_start": 214.23,
+      "concat_end": 273.27,
+      "concat_dur": 59.04
+    },
+    {
+      "start": 476.91,
+      "end": 520.45,
+      "duration": 43.54,
+      "speaker": "Khánh Vy",
+      "text": "Em có nghĩ cái đấy? Mới đây thì em xem clip của chị Thủy Tiên với chị xong em với bố cùng xem thì bố em nói đỉnh thật đấy. Sao có đứa nó sinh ra hoàn cảnh nó thế mà nó thành công mà nó giỏi, IQ, EQ đều cao. Em cũng nghĩ là thực ra cái phần lớn về cái tư tưởng, định hướng của em là được gia đình giúp định hướng rất là nhiều. Nhưng mà em cảm giác là cái tính của em khi mà sinh ra là đã rất là nhiều năng lượng và kiểu đã rất là thích nói chuyện với người khác quảng giao nên em nghĩ là em sẽ vẫn có thể thực hiện hóa được những cái ước mơ của mình dựa trên khía cạnh đó của mình.",
+      "concat_start": 273.27,
+      "concat_end": 317.01,
+      "concat_dur": 43.74
+    },
+    {
+      "start": 524.02,
+      "end": 524.98,
+      "duration": 0.96,
+      "speaker": "Khánh Vy",
+      "text": "Cung Sư Tử.",
+      "concat_start": 317.01,
+      "concat_end": 318.17,
+      "concat_dur": 1.16
+    },
+    {
+      "start": 532.75,
+      "end": 533.14,
+      "duration": 0.39,
+      "speaker": "Khánh Vy",
+      "text": "Em rất là hợp Thiên Bình.",
+      "concat_start": 318.17,
+      "concat_end": 318.76,
+      "concat_dur": 0.59
+    },
+    {
+      "start": 556.13,
+      "end": 567.98,
+      "duration": 11.85,
+      "speaker": "Khánh Vy",
+      "text": "Thực ra là em định cứ cuối một năm 31 tháng 12 là em sẽ làm một video clip thì em cũng làm được trong vòng năm rồi. Em cũng làm trong vòng ba năm rồi. Nhưng mà đây là cái hình thức nhiều khi nó cũng thấy được thay đổi một tí.",
+      "concat_start": 318.76,
+      "concat_end": 330.81,
+      "concat_dur": 12.05
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "file_id": "528",
+  "ground_truth": "Phải nói là không phải chỉ riêng một mình mình mà cả gia đình đều rất là tự hào về những danh hiệu mà bà được tặng. Bởi vì đấy là một sự nỗ lực có thể nói là ngoài sự tưởng tượng của gia đình. Ai cũng biết là bà là một người phụ nữ của gia đình nấu ăn ngon nhưng mà từ sự ăn ngon ở trong gia đình nó lan được đến xã hội, lan được đến những người yêu ẩm thực thì nó là cả một hành trình",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Phải nói là không phải chỉ riêng một mình mình mà cả gia đình đều rất là tự hào về những cái danh hiệu mà bà được tặng. Bởi vì là đấy là một cái sự nỗ lực có thể nói là ngoài sự tưởng tượng của gia đình. Ai cũng biết là bà là một người phụ nữ của gia đình nấu ăn ngon nhưng mà để đến từ cái sự ăn ngon ở trong gia đình nó lan được đến xã hội, lan được đến những người yêu ẩm thực thì nó là cả một cái hành trình",
+  "duration": 29.208,
+  "latency": 15.367,
+  "rtf": 0.5261
+}

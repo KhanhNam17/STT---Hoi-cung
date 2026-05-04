@@ -1,0 +1,11 @@
+{
+  "file_id": "1044",
+  "ground_truth": "Nông thôn mới của xã mình thì thấy dân ở đây rất là phấn khởi. Và sau khi hộ kinh doanh của mình cũng được là mua bán đông hơn, chính quyền cũng tạo điều kiện cho mình. Kinh doanh mua bán rất tốt.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Nông thông mới của xã mình thì thấy dân ở đây rất là phán khởi và sau khi hộ kinh doanh của mình cũng được mua bán đông hơn, chính quyền cũng tạo điều thực hiện cho mình, kinh doanh mua bán rất tốt.",
+  "duration": 14.029,
+  "latency": 11.236,
+  "rtf": 0.8009
+}

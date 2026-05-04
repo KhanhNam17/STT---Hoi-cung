@@ -1,0 +1,11 @@
+{
+  "file_id": "seg_0002",
+  "ground_truth": "phải vừa không phải nói dối nhưng mà lại phải cũng không nên quá trần trụi đối với một người như Thùy Minh thì không phải dễ thế nhưng mà hy vọng ngày hôm nay là Hà Anh Tuấn sẽ mang đến một cuộc nói chuyện vui vẻ, chân thành cho Vietcetera Bây giờ nếu mà bạn phải chọn một cái món đồ uống mà nó đại diện cho mình cho content, nội dung của bản thân mình thì sẽ là",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Vừa không phải nói dối nhưng mà lại phải không nên quá trần trụi đối với một người như Thùy Minh",
+  "duration": 7.243,
+  "latency": 9.547,
+  "rtf": 1.318
+}

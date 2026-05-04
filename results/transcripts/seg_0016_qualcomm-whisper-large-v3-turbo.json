@@ -1,0 +1,11 @@
+{
+  "file_id": "seg_0016",
+  "ground_truth": "Gần nhất ở cái thời điểm này là 3 giờ chiều ngày thứ 2 thì đúng 5 tiếng nữa thì cái sản phẩm âm nhạc mới nhất của Hành Tuấn sẽ xuất hiện trên Youtube cái dự án tên là Vestong Tại sao lại là Vestong?",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "gần nhất ở cái thời điểm này là 3 giờ chiều ngày thứ 2",
+  "duration": 3.962,
+  "latency": 9.989,
+  "rtf": 2.5212
+}

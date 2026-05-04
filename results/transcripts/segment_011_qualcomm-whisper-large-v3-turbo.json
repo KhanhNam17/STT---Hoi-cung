@@ -1,0 +1,11 @@
+{
+  "file_id": "segment_011",
+  "ground_truth": "cớ. Mình làm dự án âm nhạc mới. Để nói về cái veston thì nó dài và nó nhiều lắm. Tuấn nghĩ là trong cuộc nói chuyện này Tuấn sẽ nói từ từ trong những câu hỏi tiếp theo của mìn",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "you",
+  "duration": 0.0,
+  "latency": 8.873,
+  "rtf": null
+}

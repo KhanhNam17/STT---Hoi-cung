@@ -1,0 +1,11 @@
+{
+  "file_id": "segment_002",
+  "ground_truth": "Bây giờ, nếu mà bạn phải chọn một món đồ uống mà nó đại diện cho mình, cho content nội dung của bản thân mình thì sẽ là... [Ca sĩ Hà Anh Tuấn]: Cà phê nóng hay đá thì tùy vào thời tiết nhưng mà là không đường là chắc chắn rồi. Tại sao ám ảnh bởi đường?",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Bây giờ nếu mà bạn phải chọn một cái món đồ uống mà nó đại diện cho mình, cho content nội dung của bản thân mình thì sẽ là? Cà phê. Và cà phê đen nóng, Americano. Đen nóng hay đá thì tùy vào thời tiết. Nhưng mà không đường là chắc chắn rồi. Tại sao? Ám ảnh với đường.",
+  "duration": 23.91,
+  "latency": 14.164,
+  "rtf": 0.5924
+}

@@ -1,0 +1,11 @@
+{
+  "file_id": "seg_0017",
+  "ground_truth": "Thật ra Vestong nó là một cái ý niệm và một cái hình tượng mà Tuấn ấp ủ từ lâu Bởi vì Tuấn nhìn quanh đi còn lại cái hình ảnh của mình này cái hình ảnh mà mình tin ấy",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "thì đúng 5 tiếng nữa thì cái sản phẩm âm nhạc mới nhất của",
+  "duration": 3.321,
+  "latency": 11.044,
+  "rtf": 3.3255
+}

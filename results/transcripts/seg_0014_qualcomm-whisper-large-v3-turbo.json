@@ -1,0 +1,11 @@
+{
+  "file_id": "seg_0014",
+  "ground_truth": "Có đường, có một chút đường Nhưng mà chúng tôi đang nói chuyện vào buổi chiều Với những người hay uống cà phê, có đường có muối Cứ gặp Thủy Minh là sẽ được uống cà phê và có muối Anh nhắc lại Tuấn là câu chuyện, một talk show Đầu đời Đầu đời và khủng khiếp Bị Thủy Minh lừa Hồi đó là đúng tại sao lại có một câu chuyện là có cà phê có muối nhỉ?",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Hãy subscribe cho kênh Ghiền Mì Gõ Để không bỏ lỡ những video hấp dẫn",
+  "duration": 6.886,
+  "latency": 10.111,
+  "rtf": 1.4683
+}

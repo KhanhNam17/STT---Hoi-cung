@@ -1,0 +1,11 @@
+{
+  "file_id": "1047",
+  "ground_truth": "Ngân sách địa phương cũng đầu tư năm tỷ đồng để mở các cái tuyến giao thông hai mét, bốn mét. Còn huyện đầu tư thì trên mười ki lô mét lộ bốn mét trên địa bàn của xã Định Môn. Bên cạnh đó thì người dân cũng tích cực làm các cái mô hình về phát triển kinh tế, rồi mô hình về đảm bảo an ninh trật tự, tạo cảnh quan môi trường.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Căn sách địa phương cũng đầu tư là 5 tỷ đồng để mở các cái tiếng giao thông 2m, 4m. Còn quyền đầu tư thì trên 10km lộ 4m trên địa bàn của xã Linh Môn. Bên cạnh đó thì người dân cũng tích cực làm các cái mô hình về phát triển kinh tế, rồi mô hình về đảm bảo an ninh trật tự, tạo cảnh quan môi trường.",
+  "duration": 25.858,
+  "latency": 15.512,
+  "rtf": 0.5999
+}

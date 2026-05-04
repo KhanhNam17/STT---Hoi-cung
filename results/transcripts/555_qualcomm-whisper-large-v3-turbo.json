@@ -1,0 +1,11 @@
+{
+  "file_id": "555",
+  "ground_truth": "Trên tinh thần mở rộng đường làng ngõ xóm thì có rất nhiều cái yếu tố mà ảnh hưởng đến công việc tổ chức thực hiện, đặc biệt là hệ thống đường điện cũ. Do vậy là sau khi mà chúng tôi mở rộng đường thì tiếp tục đề xuất với điện lực Hải Dương và điện lực Cẩm Giàng sẽ quan tâm để chuyển toàn bộ các cái chân cột điện ở trong lòng đường. Đấy thì cũng đề nghị các cấp quan tâm và đồng thời là thực hiện.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Trên tinh thần mở rộng đường nàng ngõ xóm thì có rất nhiều yếu tố mà ảnh hưởng đến công việc tổ chức thực hiện, đặc biệt là hệ thống đường điện cũ. Sau khi chúng tôi mở rộng đường thì tiếp tục đề xuất với điện lực Khải Dương, điện lực Cẩm Giàng sẽ quan tâm để chuyển toàn bộ các chân cột điện trong nòng đường. Продолжение следует...",
+  "duration": 30.821,
+  "latency": 48.961,
+  "rtf": 1.5886
+}

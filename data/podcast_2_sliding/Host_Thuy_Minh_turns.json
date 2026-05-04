@@ -1,0 +1,299 @@
+{
+  "speaker": "Host Thuỳ Minh",
+  "total_duration": 273.83,
+  "n_turns": 17,
+  "sliding_windows": 10,
+  "original_turns": [
+    {
+      "start": 0.14,
+      "end": 1.7,
+      "duration": 1.56,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Xin chào mừng Khánh Vy đến với Have a Sip."
+    },
+    {
+      "start": 6.44,
+      "end": 36.23,
+      "duration": 29.79,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Thực ra chúng tôi cũng phải mất rất là nhiều lần. Đôi khi mình thấy cái duyên là quan trọng hơn cả. Bởi vì mình định định, định xong rồi sau đấy mình. Các bạn ạ, khánh Vy đã có mặt ở Have a Sip bởi vì là Chị ơi, em nhắn nhầm, em nhắn là tháng hai. Tháng ba đấy Thùy Minh Lúc mà nhận được tin nhắn là cuối tháng ba em sẽ có thời gian mà lúc đấy là mới kiểu tháng tháng đầu tháng hai xong rồi còn hai tháng nữa thì thôi, từ từ rồi xong đến cách đây hai ngày. Ôi em ơi, em nhầm. Em là tháng 2."
+    },
+    {
+      "start": 44.09,
+      "end": 71.94,
+      "duration": 27.85,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Thôi, mình cũng đã ở đây. Chào mừng Khánh Vy đến với Have a Sip. Đầu tiên là luôn hỏi là đồ uống gì hôm nay đồ uống kiểu kiều diễm hơn hẳn đây là một cốc nước lọc Có mật ong và có một cành hoa. Cảm ơn các bạn đã đặt một cành hoa vào đồ uống. Tại sao lại là đồ uống này?"
+    },
+    {
+      "start": 93.54,
+      "end": 95.46,
+      "duration": 1.92,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Thói quen này bao lâu rồi?"
+    },
+    {
+      "start": 112.92,
+      "end": 129.76,
+      "duration": 16.84,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Chị sẽ hỏi kĩ tí nhé. Đấy là em bắt đầu đi làm thì nhận ra là mình sẽ tập trung uống nước lọc chẳng hạn. Hay là em trước khi em trở thành MC, em đã nghĩ em đã có một danh sách là tôi sẽ làm điều này để cho cái nghề nghiệp của tôi. Em là kiểu người nào?"
+    },
+    {
+      "start": 145.27,
+      "end": 171.25,
+      "duration": 25.98,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Tức là không. Mà thực ra chị nghĩ là chị hỏi hơi sai. Ý của chị là em là người, là khi vào việc em rồi thì mới nghĩ là mình sẽ uống nước lọc để cho giọng mình tốt. Tức là dựa trên kinh nghiệm của mình, mình thấy là mình uống những cái đồ khác thì giọng mình không tốt bằng. Hay em là kiểu người vì tôi muốn trở thành một người tốt cho nên tôi sẽ quyết định là tôi chỉ uống nước lọc trước khi kể cả trước khi trở thành MC."
+    },
+    {
+      "start": 210.05,
+      "end": 223.64,
+      "duration": 13.59,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Chị hỏi bởi vì có vẻ như chị không biết. Thực ra ở tuổi của em, chị không biết ai thành công hơn em. Tất nhiên là có nhiều nhưng mà. Nhưng mà có nhiều người gặp em và nói là cái điều gì? Bí quyết của em là gì mà sao thành công thế không?"
+    },
+    {
+      "start": 247.63,
+      "end": 250.06,
+      "duration": 2.43,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Tác giả Tư Trung đúng không? Có phải không? Thế là."
+    },
+    {
+      "start": 271.99,
+      "end": 281.08,
+      "duration": 9.09,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Tức là sao? Tức là sẽ muốn con mình vẫn nên nói chuyện tức là tức là không phải là cái thời điểm mà không phải là cái việc ai đó đến với mình vì cái thời điểm rạng rỡ của mình hay là sao?"
+    },
+    {
+      "start": 305.83,
+      "end": 313.42,
+      "duration": 7.59,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Em hay nghĩ về chuyện tương lai xa đến mức độ là khi nào mình già cái này cái này lâu chưa?"
+    },
+    {
+      "start": 325.3,
+      "end": 331.33,
+      "duration": 6.03,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Lúc em sinh ra là chị gái em đã đi học rồi đúng không? Có phải là bây giờ bố mẹ bao nhiêu tuổi?"
+    },
+    {
+      "start": 354.64,
+      "end": 401.75,
+      "duration": 47.11,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Cái điều này chị hỏi kĩ, bởi vì là chị cũng kì lạ là tại sao mình lại nói cùng một chủ đề. Tại vì thường chỉ có cảm giác ở tuổi của em, mọi người sẽ chưa ngay lập tức giống như chị ở tuổi của em, chị hay chưa nghĩ chuyện về bố mẹ mình già. Nhưng khi ở tuổi của chị rồi bắt đầu có con cái rồi. Và chị nhớ là một trong những người thầy của chị là chị Diễm Quỳnh. Chị có nói một câu là có hai thứ mình không thể dừng lại được. Đấy là chuyện trẻ con lớn lên và người già, già đi thì thực ra chị nghĩ là cái điểm tốt của tất cả các thế hệ là mình đặt mình ở tương quan với các thế hệ khác. Em là người. Thực ra mọi người đều biết là cái gắn kết của em với gia đình cũng rất là nhiều đúng không? Mọi người thường hay nói gì về công việc của em? Tức là mọi người có biết là từ bé em sẽ trở thành một người như thế này, Cô gái như thế nào không?"
+    },
+    {
+      "start": 460.59,
+      "end": 476.91,
+      "duration": 16.32,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Em có bao giờ nghĩ chị không biết là cái câu này nghe nó hơi quá đáng, nhưng mà tất nhiên là mình không chọn gia đình mình sinh ra và mình phát triển. Nhưng mà em có bao giờ đặt một cái tình huống là nếu mình không được ở trong gia đình của mình như bây giờ thì cái kịch bản cuộc đời sẽ như thế nào?"
+    },
+    {
+      "start": 520.45,
+      "end": 524.02,
+      "duration": 3.57,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Bây giờ nhớ ra hình như là hai người cùng là cung Sư Tử thì sao?"
+    },
+    {
+      "start": 524.98,
+      "end": 532.75,
+      "duration": 7.77,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Bạn kia cũng thế. Hình như cũng sinh năm chín chín cung gì chị chị cung Thiên Bình."
+    },
+    {
+      "start": 533.14,
+      "end": 556.13,
+      "duration": 22.99,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Chị đang yêu người cung Sư Tử. Rồi chị có xem lại cái video mà em làm cả hai không mười chín à? Năm mươi điều, 50 điều tôi thực hiện được trong 10 năm qua. Bây giờ thì em sẽ. Em chưa có video mới. Em định 10 năm mới làm một lần hay như nào?"
+    },
+    {
+      "start": 567.98,
+      "end": 597.98,
+      "duration": 30.0,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Tại vì chị, cách mà chị research là nhân vật có rất nhiều năm trước các chị các chị cho nó chứ còn thực ra là nếu mà thì thực ra là kể cả ví dụ như chị phỏng vấn tác giả sách, chị cố gắng đọc sách của họ, nhưng cũng có những cái người mà sách của họ quá nhiều. Hồi đó chị phỏng vấn anh Trương Quý chẳng hạn, chị mua hết 10 quyển sách của anh ấy, hoặc là bác Phan Cẩm Thượng. Sách của bác ấy dày như thế này thì không có cách nào mình, mình đọc hết. Mình sẽ giả vờ, mình đọc một ít. Chị hiểu thế. Nhưng mà theo em thì cái thời điểm này."
+    }
+  ],
+  "concat_turns": [
+    {
+      "start": 0.14,
+      "end": 1.7,
+      "duration": 1.56,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Xin chào mừng Khánh Vy đến với Have a Sip.",
+      "concat_start": 0.0,
+      "concat_end": 1.76,
+      "concat_dur": 1.76
+    },
+    {
+      "start": 6.44,
+      "end": 36.23,
+      "duration": 29.79,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Thực ra chúng tôi cũng phải mất rất là nhiều lần. Đôi khi mình thấy cái duyên là quan trọng hơn cả. Bởi vì mình định định, định xong rồi sau đấy mình. Các bạn ạ, khánh Vy đã có mặt ở Have a Sip bởi vì là Chị ơi, em nhắn nhầm, em nhắn là tháng hai. Tháng ba đấy Thùy Minh Lúc mà nhận được tin nhắn là cuối tháng ba em sẽ có thời gian mà lúc đấy là mới kiểu tháng tháng đầu tháng hai xong rồi còn hai tháng nữa thì thôi, từ từ rồi xong đến cách đây hai ngày. Ôi em ơi, em nhầm. Em là tháng 2.",
+      "concat_start": 1.76,
+      "concat_end": 31.75,
+      "concat_dur": 29.99
+    },
+    {
+      "start": 44.09,
+      "end": 71.94,
+      "duration": 27.85,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Thôi, mình cũng đã ở đây. Chào mừng Khánh Vy đến với Have a Sip. Đầu tiên là luôn hỏi là đồ uống gì hôm nay đồ uống kiểu kiều diễm hơn hẳn đây là một cốc nước lọc Có mật ong và có một cành hoa. Cảm ơn các bạn đã đặt một cành hoa vào đồ uống. Tại sao lại là đồ uống này?",
+      "concat_start": 31.75,
+      "concat_end": 59.8,
+      "concat_dur": 28.05
+    },
+    {
+      "start": 93.54,
+      "end": 95.46,
+      "duration": 1.92,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Thói quen này bao lâu rồi?",
+      "concat_start": 59.8,
+      "concat_end": 61.92,
+      "concat_dur": 2.12
+    },
+    {
+      "start": 112.92,
+      "end": 129.76,
+      "duration": 16.84,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Chị sẽ hỏi kĩ tí nhé. Đấy là em bắt đầu đi làm thì nhận ra là mình sẽ tập trung uống nước lọc chẳng hạn. Hay là em trước khi em trở thành MC, em đã nghĩ em đã có một danh sách là tôi sẽ làm điều này để cho cái nghề nghiệp của tôi. Em là kiểu người nào?",
+      "concat_start": 61.92,
+      "concat_end": 78.96,
+      "concat_dur": 17.04
+    },
+    {
+      "start": 145.27,
+      "end": 171.25,
+      "duration": 25.98,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Tức là không. Mà thực ra chị nghĩ là chị hỏi hơi sai. Ý của chị là em là người, là khi vào việc em rồi thì mới nghĩ là mình sẽ uống nước lọc để cho giọng mình tốt. Tức là dựa trên kinh nghiệm của mình, mình thấy là mình uống những cái đồ khác thì giọng mình không tốt bằng. Hay em là kiểu người vì tôi muốn trở thành một người tốt cho nên tôi sẽ quyết định là tôi chỉ uống nước lọc trước khi kể cả trước khi trở thành MC.",
+      "concat_start": 78.96,
+      "concat_end": 105.14,
+      "concat_dur": 26.18
+    },
+    {
+      "start": 210.05,
+      "end": 223.64,
+      "duration": 13.59,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Chị hỏi bởi vì có vẻ như chị không biết. Thực ra ở tuổi của em, chị không biết ai thành công hơn em. Tất nhiên là có nhiều nhưng mà. Nhưng mà có nhiều người gặp em và nói là cái điều gì? Bí quyết của em là gì mà sao thành công thế không?",
+      "concat_start": 105.14,
+      "concat_end": 118.93,
+      "concat_dur": 13.79
+    },
+    {
+      "start": 247.63,
+      "end": 250.06,
+      "duration": 2.43,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Tác giả Tư Trung đúng không? Có phải không? Thế là.",
+      "concat_start": 118.93,
+      "concat_end": 121.56,
+      "concat_dur": 2.63
+    },
+    {
+      "start": 271.99,
+      "end": 281.08,
+      "duration": 9.09,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Tức là sao? Tức là sẽ muốn con mình vẫn nên nói chuyện tức là tức là không phải là cái thời điểm mà không phải là cái việc ai đó đến với mình vì cái thời điểm rạng rỡ của mình hay là sao?",
+      "concat_start": 121.56,
+      "concat_end": 130.85,
+      "concat_dur": 9.29
+    },
+    {
+      "start": 305.83,
+      "end": 313.42,
+      "duration": 7.59,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Em hay nghĩ về chuyện tương lai xa đến mức độ là khi nào mình già cái này cái này lâu chưa?",
+      "concat_start": 130.85,
+      "concat_end": 138.64,
+      "concat_dur": 7.79
+    },
+    {
+      "start": 325.3,
+      "end": 331.33,
+      "duration": 6.03,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Lúc em sinh ra là chị gái em đã đi học rồi đúng không? Có phải là bây giờ bố mẹ bao nhiêu tuổi?",
+      "concat_start": 138.64,
+      "concat_end": 144.87,
+      "concat_dur": 6.23
+    },
+    {
+      "start": 354.64,
+      "end": 401.75,
+      "duration": 47.11,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Cái điều này chị hỏi kĩ, bởi vì là chị cũng kì lạ là tại sao mình lại nói cùng một chủ đề. Tại vì thường chỉ có cảm giác ở tuổi của em, mọi người sẽ chưa ngay lập tức giống như chị ở tuổi của em, chị hay chưa nghĩ chuyện về bố mẹ mình già. Nhưng khi ở tuổi của chị rồi bắt đầu có con cái rồi. Và chị nhớ là một trong những người thầy của chị là chị Diễm Quỳnh. Chị có nói một câu là có hai thứ mình không thể dừng lại được. Đấy là chuyện trẻ con lớn lên và người già, già đi thì thực ra chị nghĩ là cái điểm tốt của tất cả các thế hệ là mình đặt mình ở tương quan với các thế hệ khác. Em là người. Thực ra mọi người đều biết là cái gắn kết của em với gia đình cũng rất là nhiều đúng không? Mọi người thường hay nói gì về công việc của em? Tức là mọi người có biết là từ bé em sẽ trở thành một người như thế này, Cô gái như thế nào không?",
+      "concat_start": 144.87,
+      "concat_end": 192.18,
+      "concat_dur": 47.31
+    },
+    {
+      "start": 460.59,
+      "end": 476.91,
+      "duration": 16.32,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Em có bao giờ nghĩ chị không biết là cái câu này nghe nó hơi quá đáng, nhưng mà tất nhiên là mình không chọn gia đình mình sinh ra và mình phát triển. Nhưng mà em có bao giờ đặt một cái tình huống là nếu mình không được ở trong gia đình của mình như bây giờ thì cái kịch bản cuộc đời sẽ như thế nào?",
+      "concat_start": 192.18,
+      "concat_end": 208.7,
+      "concat_dur": 16.52
+    },
+    {
+      "start": 520.45,
+      "end": 524.02,
+      "duration": 3.57,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Bây giờ nhớ ra hình như là hai người cùng là cung Sư Tử thì sao?",
+      "concat_start": 208.7,
+      "concat_end": 212.47,
+      "concat_dur": 3.77
+    },
+    {
+      "start": 524.98,
+      "end": 532.75,
+      "duration": 7.77,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Bạn kia cũng thế. Hình như cũng sinh năm chín chín cung gì chị chị cung Thiên Bình.",
+      "concat_start": 212.47,
+      "concat_end": 220.44,
+      "concat_dur": 7.97
+    },
+    {
+      "start": 533.14,
+      "end": 556.13,
+      "duration": 22.99,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Chị đang yêu người cung Sư Tử. Rồi chị có xem lại cái video mà em làm cả hai không mười chín à? Năm mươi điều, 50 điều tôi thực hiện được trong 10 năm qua. Bây giờ thì em sẽ. Em chưa có video mới. Em định 10 năm mới làm một lần hay như nào?",
+      "concat_start": 220.44,
+      "concat_end": 243.63,
+      "concat_dur": 23.19
+    },
+    {
+      "start": 567.98,
+      "end": 597.98,
+      "duration": 30.0,
+      "speaker": "Host Thuỳ Minh",
+      "text": "Tại vì chị, cách mà chị research là nhân vật có rất nhiều năm trước các chị các chị cho nó chứ còn thực ra là nếu mà thì thực ra là kể cả ví dụ như chị phỏng vấn tác giả sách, chị cố gắng đọc sách của họ, nhưng cũng có những cái người mà sách của họ quá nhiều. Hồi đó chị phỏng vấn anh Trương Quý chẳng hạn, chị mua hết 10 quyển sách của anh ấy, hoặc là bác Phan Cẩm Thượng. Sách của bác ấy dày như thế này thì không có cách nào mình, mình đọc hết. Mình sẽ giả vờ, mình đọc một ít. Chị hiểu thế. Nhưng mà theo em thì cái thời điểm này.",
+      "concat_start": 243.63,
+      "concat_end": 273.83,
+      "concat_dur": 30.2
+    }
+  ]
+}

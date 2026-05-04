@@ -1,0 +1,11 @@
+{
+  "file_id": "559",
+  "ground_truth": "Lựa chọn sách giáo khóa cho lớp mười năm học hai không hai ba hai không hai tư và dự kiến là trong tháng bảy này sẽ hoàn thành. Và trong tháng bảy này thì nhà trường cũng sẽ quyết định danh mục sách giáo khoa cho năm học mới đối với lớp mười năm học hai không hai ba hai không hai tư để chuẩn bị các em học sinh lớp mười về tập trung nhận lớp thì chúng tôi sẽ có ngay danh mục đó để cho các học sinh và phụ huynh học sinh tham khảo để biết được là năm học tới đối với các em lớp mười sẽ học loại chọn sách gì.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Lựa chọn sách giáo khoa cho lớp 10 năm học 2023-2024 và dự kiến là trong tháng 7 sẽ hoàn thành. Và trong tháng 7 này thì nhà trường cũng sẽ quyết định danh mục sách giáo khoa cho năm học mới đối với lớp 10 năm học 2023-2024. Để chuẩn bị các em học sinh lớp 10 về tập trung nhận lớp thì chúng tôi sẽ có ngay danh mục đó để cho các học sinh và phụ huynh học sinh tham khảo để biết được. Sí.",
+  "duration": 30.602,
+  "latency": 24.473,
+  "rtf": 0.7997
+}

@@ -1,0 +1,11 @@
+{
+  "file_id": "segment_001",
+  "ground_truth": "Chào Minh, chào Vietcetera, đọc như thế phải không. Rất là khó để nhận lời phỏng vấn và lại là một bạn người bạn thân. Bởi vì cái. Hà Anh Tuấn nghĩ rằng là để mình trả lời câu hỏi thì không khó, nhưng mà để chọn một thái độ vừa không phải nói dối. Cũng không nên quá trần trụi. Đối với một người như Thùy Minh thì thì không phải dễ, nhưng hy vọng hôm nay là Hà Anh Tuấn sẽ mang đến một cuộc nói chuyện vui vẻ, chân thành cho Vietcetera.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Chào Minh, chào Vietcetera, đọc thấy phải không? Vietcetera. Rất là khó để nhận lời phỏng vấn mà lại là một người bạn thân. Bởi vì hai anh Tuấn nghĩ rằng để mà mình trả lời câu hỏi thì nó cũng khó. Nhưng mà để chọn một thái độ, vừa không phải nói dối nhưng mà lại phải cũng không nên quá trần trụi đối với một người như Thùy Minh. Thì không phải dễ Thế nhưng mà hy vọng ngày hôm nay là Hà Anh Tuấn sẽ mang đến một cuộc nói chuyện vui vẻ, chân thành cho Vietcetera",
+  "duration": 40.18,
+  "latency": 25.594,
+  "rtf": 0.637
+}

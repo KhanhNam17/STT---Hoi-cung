@@ -1,0 +1,11 @@
+{
+  "file_id": "1051",
+  "ground_truth": "Thì trong năm hai ngàn hai mươi hai thì Cũng được các mạnh thường quân đầu tư được sáu cây cầu bê tông kích thước từ ba mét năm đến bốn mét bề rộng.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Trong năm 2022, các mạnh thường quân đầu tư được 6 cầu bê tông kích thước từ 3m5-4m7 đồng.",
+  "duration": 11.012,
+  "latency": 11.038,
+  "rtf": 1.0024
+}

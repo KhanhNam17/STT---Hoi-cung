@@ -1,0 +1,11 @@
+{
+  "file_id": "seg_0013",
+  "ground_truth": "Hôm nay thì mời Tuấn một ly cà phê có đường chứ Có đường à?",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Hôm nay",
+  "duration": 1.181,
+  "latency": 8.801,
+  "rtf": 7.4524
+}

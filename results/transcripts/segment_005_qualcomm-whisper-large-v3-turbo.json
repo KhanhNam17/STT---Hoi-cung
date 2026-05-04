@@ -1,0 +1,11 @@
+{
+  "file_id": "segment_005",
+  "ground_truth": "Hồi đó là đúng. Tại sao lại có một câu chuyện là có cafe muối nhỉ? Mà thôi, cái chuyện này mình cứ giữ riêng cho nhau, tại vì gợi lại thì nó quá lâu, nó liên quan đến cả 10 năm tình bạn. Câu chuyện cà phê chỉ là câu chuyện mở đầu câu chuyện và cà phê. Tuấn thì cái chuyện Tuấn có một cái đồ uống là cà phê đại diện cho mình thì nó khá dễ hiểu. Thậm chí, Tuấn đã ra cả một album gắn rất là nhiều mình với cafe và Thuỳ Minh tin là những dự án sắp tới của Tuấn thì cái hình ảnh cà phê nó cũng khá là len lỏi đúng không? Nhưng mà mình sẽ nói đến cái sản phẩm gần nhất ở cái thời điểm này là ba giờ chiều ngày thứ hai thì đúng năm tiếng nữa thì cái sản phẩm âm nhạc mới nhất của Hà Anh Tuấn sẽ xuất hiện trên Youtube. Cái dự án tên là Veston. Tại sao lại là veston?",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Hồi đó là đúng tại sao lại có một cái câu chuyện là có cà phê có muối nhỉ? Thôi cái chuyện này mình cứ giữ riêng cho nhau tại vì gợi lại thì nó quá lâu, nó liên quan đến cả 10 năm tình bạn. Câu chuyện cà phê chỉ là câu chuyện mở đầu câu chuyện và cà phê Tuấn thì cái chuyện Tuấn có một cái đồ uống là cà phê đại diện cho mình thì nó khá dễ hiểu. Thậm chí Tuấn đã ra cả một cái album gắn rất là nhiều mình với cà phê và thì mình tin là những cái dự án sắp tới của Tuấn thì cái hình ảnh cà phê nó cũng... Hãy subscribe cho kênh Ghiền Mì Gõ Để không bỏ lỡ những video hấp dẫn",
+  "duration": 50.44,
+  "latency": 29.395,
+  "rtf": 0.5828
+}

@@ -1,0 +1,11 @@
+{
+  "file_id": "531",
+  "ground_truth": "Thấy mình làm vất vả, làm nguy hiểm nên dân cũng thấy quý mình, dân cũng cho mình hoa quả, nước uống. Mọi thứ nhà nước, quý khách còn cho mình mấy chục nghìn để đi mua nước uống chị ạ. Cũng thấy vui đấy.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Mình làm vất vả, làm nguy hiểm, quỹ mình cho dân cho mình hoa quả, nước uống, mọi thứ nhà nước, quỹ khách còn cho mình mấy chục nghìn để mua nước uống, chạy, thấy vui.",
+  "duration": 14.933,
+  "latency": 12.125,
+  "rtf": 0.812
+}

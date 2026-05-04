@@ -1,0 +1,11 @@
+{
+  "file_id": "644",
+  "ground_truth": "Tôi chọn những cái cửa hàng ở đây là thấy các cái mặt hàng kinh doanh rất là nhiều. Cái thứ hai nữa là các cái mẫu mã khác nhau. Cái thứ ba nữa là cái chính sách bảo hành thì rất là tốt.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Tôi chọn những cửa hàng ở đấy là thấy mặt hàng kinh doanh rất là nhiều. Thứ hai nữa là các màu mạc khác nhau. Thứ ba nữa là chính sách bảo hành rất là tốt.",
+  "duration": 15.3,
+  "latency": 11.926,
+  "rtf": 0.7795
+}

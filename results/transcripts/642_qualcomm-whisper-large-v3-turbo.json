@@ -1,0 +1,11 @@
+{
+  "file_id": "642",
+  "ground_truth": "Khu đô thị Hải Vân này á thì được chủ đầu tư đầu tư rất bài bản về hạ tầng Trong đó ví dụ như hạ tầng giao thông, hệ thống cấp nước và hệ thống thoát nước đã được làm hoàn chỉnh Cư dân mà mua sản phẩm đất ở đây thì không phải chờ đợi lâu thì được cấp giấy chứng nhận quyền sử dụng đất cho khách hàng luôn",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Khu đô thị Hải Văn này được chủ đầu tư rất bài bản về hà tầng, trong đó ví dụ như là hà tầng giáo thông, hệ thống cấp nước và hệ thống thoạt nước đã được làm hoàn chỉnh. Cư dân mà mua sản phẩm đất ở đấy thì không phải chờ đợi lâu, thì được cấp giải dựng nhân quyên trung đất cho khách hàng luôn ạ.",
+  "duration": 16.7,
+  "latency": 14.538,
+  "rtf": 0.8705
+}

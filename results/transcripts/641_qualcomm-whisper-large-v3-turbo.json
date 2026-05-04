@@ -1,0 +1,11 @@
+{
+  "file_id": "641",
+  "ground_truth": "Từ cái khâu mà lựa chọn cái đơn vị tư vấn tổ chức đấu thầu cũng như đến cái vấn đề giám sát trong cuộc đấu giá, tránh cái tình trạng là thông đồng giá, cũng như là tình trạng làm các cái cò đất, làm nhũng loạn thị trường giá, thông báo rộng rãi trước toàn thể người dân cũng như hệ thống thông tin đại chúng để người dân nắm được, có nhu cầu tham gia các cái cuộc đấu giá.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Từ khấu lựa chọn đơn vị tư vấn tổ chức đầu thâu, đến vấn đề giảm sát trong cuộc đầu giả, tránh tình trạng thông đông giả, tình trạng làm các con đất nhuận loàn thị trường giả, thông báo rộng rài trước toàn thể người dân, hệ thống thông tin để người dân nắm được, có nhu cầu tham gia cuộc đầu giả.",
+  "duration": 24.3,
+  "latency": 15.171,
+  "rtf": 0.6243
+}

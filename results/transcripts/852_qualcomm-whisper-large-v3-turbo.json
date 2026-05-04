@@ -1,0 +1,11 @@
+{
+  "file_id": "852",
+  "ground_truth": "mình đảm bảo an toàn cho người gia đình mình sẽ ở khu cách ly rồi mình nghĩ đến giúp cho thành phố Thủ Đức mau đánh thắng đại dịch để bà con có thể trở lại cuộc sống bình thường",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Mình đảm bảo an toàn cho người gia đình mình sẽ ở khu cách ly, mình nghĩ giúp cho thành phố Thủ Đức mau đánh thắng đại dịch để bà con có thể trở lại cuộc sống bình thường.",
+  "duration": 12.877,
+  "latency": 14.281,
+  "rtf": 1.109
+}

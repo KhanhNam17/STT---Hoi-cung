@@ -1,0 +1,11 @@
+{
+  "file_id": "segment_004",
+  "ground_truth": "Cứ gặp Thùy Minh là sẽ được uống cà phê và có muối. Anh nhắc lại câu chuyện Talkshow. [Host Thuỳ Minh]: Đầu đời. Đầu đời và khủng khiếp. Thùy Minh lừa.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Cứ gặp Thủy Minh là sẽ được có con cà phê và con muối Anh nhắc lại tuần là câu chuyện Talk show Đầu đời Đầu đời và khủng khiếp Đi Thủy Minh lừa",
+  "duration": 11.8,
+  "latency": 11.68,
+  "rtf": 0.9899
+}

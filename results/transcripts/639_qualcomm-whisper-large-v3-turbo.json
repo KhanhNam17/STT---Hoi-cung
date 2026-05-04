@@ -1,0 +1,11 @@
+{
+  "file_id": "639",
+  "ground_truth": "Cho đến thời điểm này chúng tôi thật sự thấy là may mắn đấy. Bởi vì khi đó là vợ chồng trẻ vừa mới sinh con cũng không đủ điều kiện để mà mua đất mua nhà. Dự án nhà ở xã hội đã cho chúng tôi một cơ hội có chỗ ở.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Cho đến thời điểm này chúng tôi thật sự thấy là may mắn đấy, bởi vì khi đó là vừa trông trẻ vừa mới sinh con cũng không đủ điều kiện để mà mua đất mua nhà. Dự án nhà ở xã hội đã cho chúng tôi một cơ hội có chỗ ở.",
+  "duration": 15.5,
+  "latency": 12.754,
+  "rtf": 0.8228
+}

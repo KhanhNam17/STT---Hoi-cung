@@ -1,0 +1,11 @@
+{
+  "file_id": "seg_0015",
+  "ground_truth": "Thôi cái chuyện này mình cứ giữ riêng cho nhau Tại vì gợi lại thì nó quá lâu Nó liên quan đến cả 10 năm tình bạn Câu chuyện cà phê chỉ là câu chuyện Mở đầu câu chuyện Và cà phê Tuấn thì Cái chuyện Tuấn có một cái đồ uống Là cà phê đại diện cho mình thì nó khá dễ hiểu Thậm chí Tuấn đã ra cả một cái album Gắn rất là nhiều mình với cà phê Và thì mình tin là những cái dự án sắp tới Của Tuấn thì cái hình ảnh cà phê Nó cũng khá là len lỏi đúng không Nhưng mà mình sẽ nói đến cái sản phẩm",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Thôi cái chuyện này mình cứ giữ riêng cho nhau tại vì gợi lại thì nó quá lâu, nó liên quan đến cả 10 năm tình bạn. Câu chuyện cà phê chỉ là câu chuyện",
+  "duration": 9.706,
+  "latency": 11.707,
+  "rtf": 1.2062
+}

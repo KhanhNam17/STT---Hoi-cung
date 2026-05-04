@@ -1,0 +1,11 @@
+{
+  "file_id": "522",
+  "ground_truth": "Cửa hàng nhà tôi là chuyên cung cấp những phụ liệu về thiết kế thời trang, những sắc tộc của dân tộc Việt Nam để những nhà thiết kế, những nghệ nhân mà người ta thiết kế lên những trang phục để đi biểu diễn trong các dịp lễ hội. Rồi là mang văn hóa của người Việt đi đến các nước.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Hà nhà tôi là chuyên cung cấp những phụ liệu về thiết kế thời trang, những sắc tộc của dân tộc Việt Nam để những nhà thiết kế, những nghệ nhân mà người ta thiết kế lên những trang phục để đi biểu diễn trong các dịp lễ hội, rồi mang văn hóa của người Việt đi đến các nước.",
+  "duration": 22.5,
+  "latency": 12.826,
+  "rtf": 0.5701
+}

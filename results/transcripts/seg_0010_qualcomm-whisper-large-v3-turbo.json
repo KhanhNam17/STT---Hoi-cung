@@ -1,0 +1,11 @@
+{
+  "file_id": "seg_0010",
+  "ground_truth": "Với mình đã ăn đủ ngọt rồi thì khi mình uống cà phê mình không nên thêm nữa.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Nóng hay đá...",
+  "duration": 1.52,
+  "latency": 9.265,
+  "rtf": 6.0953
+}

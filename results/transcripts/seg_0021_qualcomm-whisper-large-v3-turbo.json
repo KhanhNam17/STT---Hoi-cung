@@ -1,0 +1,11 @@
+{
+  "file_id": "seg_0021",
+  "ground_truth": "Thì Tuấn thấy cái vestong nó là một cái kiểu một cái solution cho mình, một cái giải tỏa.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "nghĩ là cái âm nhạc của Hải",
+  "duration": 1.78,
+  "latency": 9.404,
+  "rtf": 5.283
+}

@@ -1,0 +1,11 @@
+{
+  "file_id": "523",
+  "ground_truth": "Ở trong phố cổ thì mình cũng phải làm sao mà mình trưng bày đầy đủ những sản phẩm. Còn một số kho thì mình sẽ để xa để thứ nhất là khách vào dễ xem, thứ hai là tránh sự cháy nổ trong phố cổ. Đấy là những nguy cơ mình cũng rất là là là phải đề phòng.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Ở trong phố cổ thì mình cũng phải làm sao mà mình trưng bày đầy đủ những cái sản phẩm. Còn một số kho thì mình sẽ để xa để thứ nhất là khách vào dễ xem, thứ hai là tránh sự cháy nổ trong phố cổ. Đấy là những cái nguy cơ mình cũng rất là phải đề phòng.",
+  "duration": 20.712,
+  "latency": 12.394,
+  "rtf": 0.5984
+}

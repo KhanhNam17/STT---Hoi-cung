@@ -1,0 +1,11 @@
+{
+  "file_id": "844",
+  "ground_truth": "Thì chúng tôi có hình thành một cái đội ngũ là thanh niên xung kích về vấn đề y tế. Kèm với lại một cái bác sĩ của trạm y tế. Hiệu quả mong muốn là giảm thiểu cái trường hợp và hạn chế là trường hợp tử vong khi mà chưa được cấp cứu, kịp tới bệnh viện.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Chúng tôi có hình thành một đội ngũ là thanh viên xung tích về vấn đề y tế kèm với lại một bác sĩ của trạng y tế. Điều quả mong muốn giảm hiểu hết trường hợp hệ chế tử văn khi chưa được cấp cứu, kịp tới bệnh viện.",
+  "duration": 16.075,
+  "latency": 14.345,
+  "rtf": 0.8924
+}

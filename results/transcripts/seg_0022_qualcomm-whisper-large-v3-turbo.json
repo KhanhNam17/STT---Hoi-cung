@@ -1,0 +1,11 @@
+{
+  "file_id": "seg_0022",
+  "ground_truth": "cái điểm giải tỏa để mình có cớ mình làm cái dự án âm nhạc mới.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "cái điểm giải tỏa, điểm",
+  "duration": 1.26,
+  "latency": 9.477,
+  "rtf": 7.5212
+}

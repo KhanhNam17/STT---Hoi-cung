@@ -1,0 +1,2 @@
+model,avg_wer,avg_cer,avg_latency,avg_rtf,total_files,wer_std,avg_wer_pct,avg_cer_pct,speedup
+qualcomm-whisper-large-v3-turbo,0.3763885421915171,0.29707573999354076,13.187000000000001,0.6478,10,0.3509926317628351,37.64,29.71,1.5

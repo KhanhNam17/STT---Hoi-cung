@@ -1,0 +1,11 @@
+{
+  "file_id": "seg_0024",
+  "ground_truth": "Tuấn chỉ biết là Vestong nó là một hình ảnh, một phong cách và một thông điệp về âm nhạc mà Hải Anh Tuấn cảm thấy là nó phù hợp nhất trong cái giai đoạn này của sự nghiệp của mình.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "để",
+  "duration": 3.601,
+  "latency": 10.397,
+  "rtf": 2.8873
+}

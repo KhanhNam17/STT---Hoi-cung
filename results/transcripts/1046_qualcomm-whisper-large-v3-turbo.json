@@ -1,0 +1,11 @@
+{
+  "file_id": "1046",
+  "ground_truth": "Về chất lượng, thì năm nay các cái xã đạt chuẩn nông thôn mới nâng cao, có nhiều cái chỉ tiêu, nhiều cái tiêu chí đạt và vượt rất cao so với bộ tiêu chí đã đề ra. Cụ thể như là vấn đề thu nhập, vấn đề nước sạch, vấn đề tỷ lệ hộ dân sử dụng điện, vấn đề phát triển các cái hợp tác xã, sản phẩm ocop vân vân.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Về chất lượng thì năm nay các cái xã đặc dẫn nông thôn mới nâng cao có nhiều cái chỉ tiêu nhiều cái tiêu chí đạt và dược rất cao so với bộ tiêu chí đã đề ra cụ thể như là vấn đề thu nhập vấn đề nước sạch vấn đề tỷ lệ hậu dân sử dụng điện vấn đề phát triển các cái hợp tác xã sản phẩm ô cốp dân dân",
+  "duration": 26.626,
+  "latency": 15.669,
+  "rtf": 0.5885
+}

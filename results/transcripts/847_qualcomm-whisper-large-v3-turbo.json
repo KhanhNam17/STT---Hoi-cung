@@ -1,0 +1,11 @@
+{
+  "file_id": "847",
+  "ground_truth": "Những cái trường hợp mà không có biểu hiện và không có tổn thương phổi thì chúng tôi sẽ đưa qua cái khu chung cư phú thọ này. Nặng á thì chúng tôi sẽ đưa vào những bệnh viện tầng hai và tầng ba. Còn cái khu thứ ba là ở trường Đại học Ký Túc Xá, Đại học Sư Phạm thì hiện nay với khả năng lưu dung được khoảng sáu trăm giường.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Những trường hợp mà không có biểu hiện và không có tổng thương phổi thì chúng tôi sẽ đưa qua khu chung cư Phú Thọ này nặng thì chúng tôi sẽ đưa vào những bệnh viện tầng 2 và tầng 3. Còn khu thứ 3 là ở trường đại học kỹ thuật xá, đại học sư phạm thì hiện nay với khả năng lưu dung được khoảng 600 giường.",
+  "duration": 16.378,
+  "latency": 14.809,
+  "rtf": 0.9042
+}

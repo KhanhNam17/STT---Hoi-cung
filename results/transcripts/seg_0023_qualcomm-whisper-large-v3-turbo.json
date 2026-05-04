@@ -1,0 +1,11 @@
+{
+  "file_id": "seg_0023",
+  "ground_truth": "Để nói về cái Vestong thì nó dài và nó nhiều lắm nhưng Tuấn nghĩ là trong cái cuộc nói chuyện này Tuấn sẽ nói từ từ trong những câu hỏi tiếp theo của mình.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Mình có cớ, mình làm cái dự án âm nhạc mới",
+  "duration": 3.121,
+  "latency": 9.895,
+  "rtf": 3.1704
+}

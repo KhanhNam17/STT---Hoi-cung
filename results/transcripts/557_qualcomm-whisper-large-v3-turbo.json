@@ -1,0 +1,11 @@
+{
+  "file_id": "557",
+  "ground_truth": "Đối với nhà trường thì các bộ sách lớp một, lớp hai, lớp ba đã được tiếp nhận và gửi tới các bậc phụ huynh ngay từ cuối năm học.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Đối với nhà trường thì các bộ sách lớp 1, lớp 2, lớp 3 đã được tiếp nhận và gửi tới các bậc phụ huynh ngay từ cuối năm học.",
+  "duration": 11.375,
+  "latency": 14.221,
+  "rtf": 1.2502
+}

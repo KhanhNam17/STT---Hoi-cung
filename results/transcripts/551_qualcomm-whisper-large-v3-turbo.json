@@ -1,0 +1,11 @@
+{
+  "file_id": "551",
+  "ground_truth": "Bạn Vinh là một người có tư chất thực sự. Bạn vừa có một cái sự điềm đạm và vừa có sự thông minh nữa. Ngoài ra trên lớp bạn ấy luôn giúp đỡ các bạn khác. Thực sự rất là nhiệt tình trong việc giảng dạy và bạn ấy luôn hòa đồng với mọi người. Không ai nghĩ bạn ấy là một người cao quá trên mình, bạn lúc nào cũng tỏ ra rất là khiêm tốn. Thực sự là bọn em rất quý bạn ấy, cả lớp đều quý.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Bạn Vinh là một người có tư chất thực sự, bạn vừa có một sự điềm đạm, vừa có sự thông minh nữa. Ngoài ra thì ở trên lớp bạn ấy luôn giúp đỡ các bạn khác, thực sự rất là nhiệt tình trong việc giảng dạy và bạn ấy luôn hòa đồng với mọi người. Không ai nghĩ bạn ấy là một người cao quá trên mình, bạn lúc nào cũng tổ ra rất là khiêm tốn và thực sự bọn em rất quý bạn ấy, cả lớp đều quý.",
+  "duration": 24.674,
+  "latency": 20.893,
+  "rtf": 0.8468
+}

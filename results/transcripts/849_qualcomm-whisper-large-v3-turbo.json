@@ -1,0 +1,11 @@
+{
+  "file_id": "849",
+  "ground_truth": "Trong công việc của mình ở đây thì thường chủ yếu là sẽ tiếp nhận các cuộc gọi cấp cứu của người dân tới và sau đó xử trí, sau đó điều xe đi để hỗ trợ người dân nhanh nhất có thể. Vì cộng đồng, vì công cuộc chung thì những điều này thì cũng không phải là vấn đề lớn lắm.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Trung công việc của mình ở đây thì chủ yếu là sẽ tiếp nhận các cuộc gọi cấp cứu của người dân tới và sau đó xử trí, sau đó điều xe đi để hỗ trợ người dân nhanh nhất có thể. Vì cộng đồng, vì công cuộc chung thì những điều này cũng không phải là vấn đề lớn lắm.",
+  "duration": 13.979,
+  "latency": 32.736,
+  "rtf": 2.3418
+}

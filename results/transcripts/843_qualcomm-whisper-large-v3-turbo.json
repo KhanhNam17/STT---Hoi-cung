@@ -1,0 +1,11 @@
+{
+  "file_id": "843",
+  "ground_truth": "Ở cái tình hình dịch bệnh hiện tại đang phức tạp thì ít nhiều gì có vắc xin trong người thì cũng giảm thiểu cái khả năng nguy hiểm của chính bản thân mình.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Ở tình hình dịch bệnh hiện tại đang phức tạp thì ít nhiều gì có vaccine trong người thì cũng giảm thiểu khả năng nguy hiểm của chính bản thân mình.",
+  "duration": 12.738,
+  "latency": 20.881,
+  "rtf": 1.6393
+}

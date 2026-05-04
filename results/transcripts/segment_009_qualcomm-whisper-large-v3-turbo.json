@@ -1,0 +1,11 @@
+{
+  "file_id": "segment_009",
+  "ground_truth": "hình ảnh chiếc áo vest của mình. Và thường thì Tuấn nghĩ là âm nhạc của Hà Anh Tuấn thì nó đi ra từ chính câu chuyện của bản thân. Nó không phải chỉ là ở thời điểm này, nhưng",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Cảm ơn các bạn đã theo dõi.",
+  "duration": 24.0,
+  "latency": 9.901,
+  "rtf": 0.4125
+}

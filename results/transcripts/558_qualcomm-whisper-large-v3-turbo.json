@@ -1,0 +1,11 @@
+{
+  "file_id": "558",
+  "ground_truth": "Sau khi học sinh kết thúc năm học hai nghìn không trăm hai hai hai nghìn không trăm hai ba thì là nhà trường đã cho các em đăng ký mua sách giáo khoa và gửi tập hợp số liệu về phòng giáo dục. Thế và đang chờ sách của chương trình lớp tám. Thế còn đối với sách của lớp sáu, lớp bảy thực hiện chương trình giáo dục phổ thông hai không mười tám thì sách đã về nhà trường. Và qua kết thúc năm học vào tháng sáu khi sách về nhà trường thì qua kênh nhóm zalo của các lớp thì các bậc phụ huynh và các em học sinh đã đến trường để nhận sách để chuẩn bị cho năm học mới.",
+  "model": "qualcomm-whisper-large-v3-turbo",
+  "backend": "qualcomm-qai_hub_models",
+  "mode": "pytorch-fp",
+  "text": "Sau khi học sinh kết thúc năm học 2022-2023, nhà trường đã cho các em đăng ký mua sách giao khoa và gửi tập hợp số điệu về phòng hóa dục và đang chờ sách của chương trình lớp 8. Đối với sách lớp 6, lớp 7 thực hiện chương trình giao dục của thông 2018, sách đã về nhà trường. Hãy subscribe cho kênh Ghiền Mì Gõ Để không bỏ lỡ những video hấp dẫn",
+  "duration": 30.381,
+  "latency": 22.414,
+  "rtf": 0.7378
+}
