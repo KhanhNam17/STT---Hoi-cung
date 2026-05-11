@@ -1,0 +1,38 @@
+# requirements.txt — STT App
+# Cài đặt: pip install -r requirements.txt
+#
+# Lưu ý: qai_hub_models cài riêng bằng lệnh có [extra]:
+#   pip install "qai_hub_models[whisper-large-v3-turbo]"
+
+# ── Streamlit ────────────────────────────────────────────
+streamlit>=1.35.0
+# st.audio_input (ghi âm microphone) yêu cầu >= 1.33
+
+# ── Biến môi trường ──────────────────────────────────────
+python-dotenv>=1.0.0
+
+# ── Xử lý audio ─────────────────────────────────────────
+librosa>=0.10.0
+soundfile>=0.12.1
+
+# ── AI: PyTorch (backend cho Whisper + pyannote) ─────────
+torch>=2.2.0
+torchaudio>=2.2.0
+
+# ── AI: Qualcomm Whisper ─────────────────────────────────
+# Cài bằng lệnh riêng:
+#   pip install "qai_hub_models[whisper-large-v3-turbo]"
+qai_hub
+
+# ── AI: Speaker Diarization ──────────────────────────────
+# Yêu cầu HF_TOKEN trong .env và chấp nhận điều khoản:
+#   https://huggingface.co/pyannote/speaker-diarization-3.1
+pyannote.audio>=3.1.0
+
+# ── Xuất DOCX ────────────────────────────────────────────
+python-docx>=1.1.0
+
+# ── Tiện ích ─────────────────────────────────────────────
+pandas>=2.0.0
+numpy>=1.24.0
+tqdm>=4.66.0
