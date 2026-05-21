@@ -1,12 +1,13 @@
 import streamlit as st
 
 st.set_page_config(
-    page_title="Trợ lý Hỏi Cung",
+    page_title="Trợ lý ảo phân tích hỏi cung",
     page_icon="🎙️",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
+# Đã gỡ bỏ các đoạn ép màu nền (background) cứng để Streamlit tự động đổi màu theo Theme
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap');
@@ -16,11 +17,6 @@ st.markdown("""
     }
 
     footer { visibility: hidden; }
-
-    [data-testid="stSidebar"] {
-        background: #080c10;
-        border-right: 1px solid #1e2630;
-    }
 
     .stButton > button[kind="primary"],
     .stDownloadButton > button[kind="primary"] {
@@ -36,21 +32,17 @@ st.markdown("""
     }
 
     .stDownloadButton > button:not([kind="primary"]) {
-        background: #1a5c1a !important;
-        color: #4ec94e !important;
+        background: var(--secondary-background-color) !important;
+        color: var(--text-color) !important;
         font-weight: 600 !important;
-        border: 1px solid #2e8b2e !important;
+        border: 1px solid rgba(128,128,128,0.2) !important;
     }
 
     .stProgress > div > div > div {
         background: #e8520a !important;
     }
 
-    hr { border-color: #1e2630 !important; }
-
-    .stApp {
-        background: #0a0e14;
-    }
+    hr { border-color: rgba(128,128,128,0.2) !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -61,10 +53,10 @@ with st.sidebar:
         <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;
                     letter-spacing:3px;text-transform:uppercase;color:#e8520a;
                     margin-bottom:8px;">// HỆ THỐNG</div>
-        <div style="font-size:18px;font-weight:700;color:#e6edf3;
+        <div style="font-size:18px;font-weight:700;color:var(--text-color);
                     letter-spacing:-0.3px;">Trợ lý Hỏi Cung</div>
         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;
-                    color:#3d4f63;margin-top:6px;">STT · DIARIZATION · DOCX</div>
+                    color:var(--text-color);opacity:0.6;margin-top:6px;">STT · DIARIZATION · DOCX</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -77,10 +69,10 @@ with st.sidebar:
 
     st.markdown("""
     <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;
-                color:#3d4f63;line-height:2.2;">
-        <div>RUNTIME &nbsp;&nbsp;<span style="color:#2e8b2e;">● OFFLINE</span></div>
-        <div>STT &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#8b949e;">Whisper v3 Turbo</span></div>
-        <div>DIARIZE &nbsp;&nbsp;<span style="color:#8b949e;">pyannote 3.1</span></div>
+                color:var(--text-color);line-height:2.2;">
+        <div>RUNTIME &nbsp;&nbsp;<span style="color:#2e8b2e;font-weight:bold;">● OFFLINE</span></div>
+        <div style="opacity:0.7;">STT &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Whisper v3 Turbo</div>
+        <div style="opacity:0.7;">DIARIZE &nbsp;&nbsp;pyannote 3.1</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -94,13 +86,13 @@ st.markdown("""
 HỆ THỐNG XỬ LÝ GIỌNG NÓI
 </div>
 
-<h1 style="font-size:36px;font-weight:700;color:#e6edf3;
+<h1 style="font-size:36px;font-weight:700;color:var(--text-color);
             letter-spacing:-0.8px;line-height:1.2;margin:0 0 16px;">
 Trợ lý Ảo<br>
-<span style="color:#e8520a;">Hỗ trợ Lấy Lời Khai</span>
+<span style="color:#e8520a;">Phân tích hỏi cung</span>
 </h1>
 
-<p style="font-size:14px;color:#5a7080;line-height:1.9;
+<p style="font-size:14px;color:var(--text-color);opacity:0.7;line-height:1.9;
         margin:0 0 52px;max-width:520px;">
 Chuyển đổi giọng nói → văn bản · Phân tách người nói tự động<br>
 Xuất biên bản DOCX theo mẫu chuẩn · Xử lý cục bộ, không cần internet
@@ -113,14 +105,14 @@ _, card_col, _ = st.columns([1, 2, 1])
 
 with card_col:
     st.markdown("""
-<div style="background:#0d1219;border:1px solid #1e2630;
+<div style="background:var(--background-color);border:1px solid rgba(128,128,128,0.2);
             border-top:2px solid #e8520a;border-radius:6px;
-            padding:36px 32px 28px;margin-bottom:8px;">
+            padding:36px 32px 28px;margin-bottom:8px;box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
 
 <div style="display:flex;align-items:flex-start;gap:18px;margin-bottom:28px;">
 <div style="font-size:28px;line-height:1;margin-top:2px;">📁</div>
 <div>
-<div style="font-size:17px;font-weight:700;color:#e6edf3;
+<div style="font-size:17px;font-weight:700;color:var(--text-color);
             margin-bottom:5px;">Xử lý Dữ liệu Ghi âm/Ghi hình</div>
 <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;
             letter-spacing:2px;color:#e8520a;text-transform:uppercase;">
@@ -130,41 +122,37 @@ Batch Mode</div>
 
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 24px;
             margin-bottom:28px;">
-<div style="font-size:12px;color:#5a7080;display:flex;align-items:center;gap:7px;">
-<span style="color:#e8520a;font-size:10px;">▸</span>
-Hỗ trợ MP3 · WAV · MP4 · MKV · M4A
+<div style="font-size:12px;color:var(--text-color);opacity:0.8;display:flex;align-items:center;gap:7px;">
+<span style="color:#e8520a;font-size:10px;">▸</span> Hỗ trợ MP3 · WAV · MP4 · MKV · M4A
 </div>
-<div style="font-size:12px;color:#5a7080;display:flex;align-items:center;gap:7px;">
-<span style="color:#e8520a;font-size:10px;">▸</span>
-Phân tách người nói tự động
+<div style="font-size:12px;color:var(--text-color);opacity:0.8;display:flex;align-items:center;gap:7px;">
+<span style="color:#e8520a;font-size:10px;">▸</span> Phân tách người nói tự động
 </div>
-<div style="font-size:12px;color:#5a7080;display:flex;align-items:center;gap:7px;">
-<span style="color:#e8520a;font-size:10px;">▸</span>
-Nhận dạng tiếng Việt độ chính xác cao
+<div style="font-size:12px;color:var(--text-color);opacity:0.8;display:flex;align-items:center;gap:7px;">
+<span style="color:#e8520a;font-size:10px;">▸</span> Nhận dạng tiếng Việt độ chính xác cao
 </div>
-<div style="font-size:12px;color:#5a7080;display:flex;align-items:center;gap:7px;">
-<span style="color:#e8520a;font-size:10px;">▸</span>
-Xuất biên bản DOCX theo mẫu chuẩn
+<div style="font-size:12px;color:var(--text-color);opacity:0.8;display:flex;align-items:center;gap:7px;">
+<span style="color:#e8520a;font-size:10px;">▸</span> Xuất biên bản DOCX theo mẫu chuẩn
 </div>
 </div>
 
 <div style="display:flex;gap:6px;flex-wrap:wrap;padding-top:18px;
-            border-top:1px solid #1e2630;">
+            border-top:1px solid rgba(128,128,128,0.2);">
 <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;
              padding:3px 10px;border-radius:3px;
-             background:#131a22;border:1px solid #1e2630;color:#3d4f63;">.mp3</span>
+             background:var(--secondary-background-color);border:1px solid rgba(128,128,128,0.2);color:var(--text-color);opacity:0.8;">.mp3</span>
 <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;
              padding:3px 10px;border-radius:3px;
-             background:#131a22;border:1px solid #1e2630;color:#3d4f63;">.wav</span>
+             background:var(--secondary-background-color);border:1px solid rgba(128,128,128,0.2);color:var(--text-color);opacity:0.8;">.wav</span>
 <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;
              padding:3px 10px;border-radius:3px;
-             background:#131a22;border:1px solid #1e2630;color:#3d4f63;">.mp4</span>
+             background:var(--secondary-background-color);border:1px solid rgba(128,128,128,0.2);color:var(--text-color);opacity:0.8;">.mp4</span>
 <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;
              padding:3px 10px;border-radius:3px;
-             background:#131a22;border:1px solid #1e2630;color:#3d4f63;">.mkv</span>
+             background:var(--secondary-background-color);border:1px solid rgba(128,128,128,0.2);color:var(--text-color);opacity:0.8;">.mkv</span>
 <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;
              padding:3px 10px;border-radius:3px;
-             background:#131a22;border:1px solid #1e2630;color:#3d4f63;">.m4a</span>
+             background:var(--secondary-background-color);border:1px solid rgba(128,128,128,0.2);color:var(--text-color);opacity:0.8;">.m4a</span>
 </div>
 </div>
 """, unsafe_allow_html=True)
@@ -179,15 +167,15 @@ Xuất biên bản DOCX theo mẫu chuẩn
 st.markdown("""
 <div style="max-width:780px;margin:40px auto 0;padding:0 8px;">
     <div style="display:flex;gap:32px;padding:14px 20px;
-                background:#080c10;border:1px solid #1e2630;border-radius:4px;">
-        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#3d4f63;">
-            STATUS &nbsp;<span style="color:#2e8b2e;">● READY</span>
+                background:var(--secondary-background-color);border:1px solid rgba(128,128,128,0.2);border-radius:4px;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-color);">
+            <span style="opacity:0.7;">STATUS</span> &nbsp;<span style="color:#2e8b2e;font-weight:bold;">● READY</span>
         </div>
-        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#3d4f63;">
-            MODE &nbsp;<span style="color:#8b949e;">OFFLINE / LOCAL</span>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-color);">
+            <span style="opacity:0.7;">MODE</span> &nbsp;<span style="opacity:0.9;font-weight:bold;">OFFLINE / LOCAL</span>
         </div>
-        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#3d4f63;">
-            ENGINE &nbsp;<span style="color:#8b949e;">Whisper v3 Turbo · pyannote 3.1</span>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-color);">
+            <span style="opacity:0.7;">ENGINE</span> &nbsp;<span style="opacity:0.9;font-weight:bold;">Whisper v3 Turbo · pyannote 3.1</span>
         </div>
     </div>
 </div>
