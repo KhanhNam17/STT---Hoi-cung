@@ -1,16 +1,16 @@
 # components/export_docx.py
 #
-# Xuất transcript vào template biên bản hỏi cung thật (bienbanhoicung.docx).
+# Xuất transcript/tóm tắt vào template biên bản hỏi cung thật (bienbanhoicung.docx).
 # Template có sẵn các placeholder:
 #   {{NGAY}}   {{THANG}}   {{NAM}}       — ngày tháng năm
-#   {{NOI_DUNG_TRANSCRIPT}}              — chèn nội dung hỏi đáp vào đây
+#   {{NOI_DUNG_TRANSCRIPT}}              — chèn nội dung hỏi đáp/tóm tắt vào đây
 
 import io
 import os
 from datetime import datetime
 
 from docx import Document
-from docx.shared import Pt, RGBColor      # FIX: import từ docx.shared, không phải docx.shape
+from docx.shared import Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
@@ -25,25 +25,15 @@ COLORS_RGB = [
 
 DEFAULT_TEMPLATE = "components/templates/bienbanhoicung.docx"
 
-
-def export_to_docx(
-    turns,
+# ── 1. Hàm xuất Bản Tóm Tắt (MỚI) ───────────────────────────────────────────
+def export_summary_to_docx(
+    summary_text: str,
     session_name: str = "BB_01",
     template_path: str = DEFAULT_TEMPLATE,
 ) -> bytes:
     """
-    Điền transcript vào template biên bản hỏi cung.
-
-    Args:
-        turns         : danh sách AlignedTurn (đã gán tên thật)
-        session_name  : mã phiên — hiển thị trong tên file khi download
-        template_path : đường dẫn tới file .docx template
-
-    Returns:
-        bytes — truyền thẳng vào st.download_button(data=...)
-
-    Raises:
-        FileNotFoundError nếu không tìm thấy template
+    Điền đoạn văn bản tóm tắt thuần (plain text) vào template biên bản.
+    Format chuẩn: Times New Roman, cỡ 14, căn đều 2 bên.
     """
     if not os.path.exists(template_path):
         raise FileNotFoundError(
@@ -54,7 +44,7 @@ def export_to_docx(
     doc  = Document(template_path)
     now  = datetime.now()
 
-    # ── 1. Điền ngày tháng năm ──────────────────────────────────────────────
+    # 1. Điền ngày tháng năm
     replacements = {
         "{{NGAY}}":  now.strftime("%d"),
         "{{THANG}}": now.strftime("%m"),
@@ -64,69 +54,116 @@ def export_to_docx(
     for p in doc.paragraphs:
         for key, val in replacements.items():
             if key in p.text:
-                # Thay trong từng run để giữ nguyên định dạng chữ
                 for run in p.runs:
                     if key in run.text:
                         run.text = run.text.replace(key, val)
 
-    # ── 2. Tìm placeholder nội dung transcript ──────────────────────────────
+    # 2. Tìm placeholder nội dung transcript và chèn Tóm tắt
     target_p = None
     for p in doc.paragraphs:
         if "{{NOI_DUNG_TRANSCRIPT}}" in p.text:
             target_p = p
-            # Xoá placeholder, giữ paragraph để làm điểm chèn
+            # Xoá chữ placeholder
             for run in p.runs:
                 run.text = run.text.replace("{{NOI_DUNG_TRANSCRIPT}}", "")
             break
 
-    # ── 3. Map speaker → màu ────────────────────────────────────────────────
+    # 3. Chèn text tóm tắt
+    if target_p is not None:
+        # Tách đoạn tóm tắt thành các dòng
+        paragraphs = summary_text.split('\n')
+        
+        # Chèn xuôi chiều (insert_paragraph_before liên tục sẽ đẩy text lên đúng thứ tự)
+        for text_line in paragraphs:
+            if text_line.strip():
+                new_p = target_p.insert_paragraph_before(text_line.strip())
+                new_p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+                for run in new_p.runs:
+                    run.font.name = 'Times New Roman'
+                    run.font.size = Pt(14)
+    else:
+        # Fallback nếu không tìm thấy thẻ
+        doc.add_paragraph("--- NỘI DUNG TÓM TẮT ---").alignment = WD_ALIGN_PARAGRAPH.CENTER
+        for text_line in summary_text.split('\n'):
+            if text_line.strip():
+                new_p = doc.add_paragraph(text_line.strip())
+                new_p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+                for run in new_p.runs:
+                    run.font.name = 'Times New Roman'
+                    run.font.size = Pt(14)
+
+    # 4. Xuất ra bytes
+    buf = io.BytesIO()
+    doc.save(buf)
+    return buf.getvalue()
+
+
+# ── 2. Hàm xuất Full Transcript gốc (Giữ nguyên dự phòng) ───────────────────
+def export_to_docx(
+    turns,
+    session_name: str = "BB_01",
+    template_path: str = DEFAULT_TEMPLATE,
+) -> bytes:
+    """
+    Điền toàn bộ transcript (từng lượt nói) vào template biên bản hỏi cung.
+    """
+    if not os.path.exists(template_path):
+        raise FileNotFoundError(
+            f"Không tìm thấy file mẫu tại: {template_path}\n"
+        )
+
+    doc  = Document(template_path)
+    now  = datetime.now()
+
+    replacements = {
+        "{{NGAY}}":  now.strftime("%d"),
+        "{{THANG}}": now.strftime("%m"),
+        "{{NAM}}":   now.strftime("%Y"),
+    }
+
+    for p in doc.paragraphs:
+        for key, val in replacements.items():
+            if key in p.text:
+                for run in p.runs:
+                    if key in run.text:
+                        run.text = run.text.replace(key, val)
+
+    target_p = None
+    for p in doc.paragraphs:
+        if "{{NOI_DUNG_TRANSCRIPT}}" in p.text:
+            target_p = p
+            for run in p.runs:
+                run.text = run.text.replace("{{NOI_DUNG_TRANSCRIPT}}", "")
+            break
+
     speakers  = list(dict.fromkeys(t.speaker for t in turns))
     color_map = {
         spk: COLORS_RGB[i % len(COLORS_RGB)]
         for i, spk in enumerate(speakers)
     }
 
-    # ── 4. Chèn từng lượt hỏi-đáp ──────────────────────────────────────────
-    # BUG FIX: insert_paragraph_before() + reversed() bị ngược thứ tự.
-    # Giải thích:
-    #   insert_paragraph_before(target_p) chèn TRƯỚC target_p.
-    #   Nếu dùng reversed → turn cuối chèn trước → turn đầu chèn trước nó
-    #   → kết quả: turn đầu nằm trên cùng ✓ NHƯNG target_p vẫn còn đó ở dưới.
-    #
-    # Cách đúng: dùng _p.addnext() với turns XUÔI chiều.
-    #   addnext(new_p) chèn new_p NGAY SAU ref_p.
-    #   Lặp xuôi → turn[0].addnext → turn[1].addnext(sau turn[0]) → đúng thứ tự.
     if target_p is not None:
-        ref_p = target_p._p          # element XML làm điểm neo
-        for turn in turns:           # ← xuôi chiều, KHÔNG reversed
+        ref_p = target_p._p          
+        for turn in turns:           
             new_p_elem = _build_turn_xml(turn, color_map)
             ref_p.addnext(new_p_elem)
-            ref_p = new_p_elem       # ← cập nhật neo → lần sau chèn sau turn vừa thêm
+            ref_p = new_p_elem       
     else:
-        # Fallback: thêm vào cuối nếu không tìm thấy placeholder
         doc.add_paragraph("--- NỘI DUNG HỎI VÀ ĐÁP ---").alignment = WD_ALIGN_PARAGRAPH.CENTER
-        for turn in turns:   # xuôi chiều
+        for turn in turns:
             new_p = doc.add_paragraph()
             _write_turn(new_p, turn, color_map)
 
-    # ── 5. Xuất ra bytes ────────────────────────────────────────────────────
     buf = io.BytesIO()
     doc.save(buf)
     return buf.getvalue()
 
 
 def _build_turn_xml(turn, color_map: dict):
-    """
-    Tạo XML element <w:p> cho 1 lượt nói.
-    Trả về element thay vì modify paragraph — dùng được với addnext().
-    """
     from docx.oxml import OxmlElement
     from docx.oxml.ns import qn
 
     color = color_map.get(turn.speaker, RGBColor(0, 0, 0))
-    # RGBColor → hex string
-    # python-docx RGBColor có .red / .green / .blue (int 0-255)
-    # KHÔNG dùng [] index — RGBColor không subscriptable
     try:
         hex_color = f"{color.red:02X}{color.green:02X}{color.blue:02X}"
     except AttributeError:
@@ -137,19 +174,15 @@ def _build_turn_xml(turn, color_map: dict):
     def _run(text, bold=False, size_pt=11, hex_c=None):
         r = OxmlElement("w:r")
         rPr = OxmlElement("w:rPr")
-        # font
         rFonts = OxmlElement("w:rFonts")
         rFonts.set(qn("w:ascii"), "Times New Roman")
         rFonts.set(qn("w:hAnsi"), "Times New Roman")
         rPr.append(rFonts)
-        # size
         sz = OxmlElement("w:sz");   sz.set(qn("w:val"), str(int(size_pt * 2)))
         szCs = OxmlElement("w:szCs"); szCs.set(qn("w:val"), str(int(size_pt * 2)))
         rPr.append(sz); rPr.append(szCs)
-        # bold
         if bold:
             rPr.append(OxmlElement("w:b"))
-        # color
         if hex_c:
             c_el = OxmlElement("w:color"); c_el.set(qn("w:val"), hex_c)
             rPr.append(c_el)
@@ -161,7 +194,6 @@ def _build_turn_xml(turn, color_map: dict):
         return r
 
     p = OxmlElement("w:p")
-    # Căn đều 2 bên
     pPr = OxmlElement("w:pPr")
     jc = OxmlElement("w:jc"); jc.set(qn("w:val"), "both")
     pPr.append(jc)
@@ -174,7 +206,6 @@ def _build_turn_xml(turn, color_map: dict):
 
 
 def _write_turn(p, turn, color_map: dict):
-    """Ghi 1 lượt nói vào paragraph p (dùng cho fallback append cuối doc)."""
     ts = f"[{int(turn.start // 60):02d}:{int(turn.start % 60):02d}]  "
     color = color_map.get(turn.speaker, RGBColor(0, 0, 0))
 

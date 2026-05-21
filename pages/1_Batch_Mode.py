@@ -14,10 +14,11 @@ from core.diarizer_nexa import load_diarizer_nexa as load_diarizer
 from core.diarizer_nexa import diarize_file_nexa as diarize_file
 from core.aligner import align, merge_consecutive, rename_turns, parse_whisper_segments
 from core.punctuation_restorer import restore
+from core.test_qwen import summarize
 
 from components.transcript_viewer import preview as show_preview, full as show_full
 from components.speaker_editor import speaker_editor
-from components.export_docx import export_to_docx
+from components.export_docx import export_summary_to_docx
 
 import warnings
 import logging
@@ -49,7 +50,9 @@ _defaults = {
     "b_name_map"     : {},
     "b_session_name" : "",
     "b_processed"    : False,
-    "b_show_full"    : False,   # toggle xem toàn bộ transcript
+    "b_show_full"    : False,
+    "b_summary_text" : None, 
+    "b_metrics"      : {},  # <-- Đã thêm biến lưu metrics
 }
 for k, v in _defaults.items():
     if k not in st.session_state:
@@ -58,7 +61,7 @@ for k, v in _defaults.items():
 # ── Header ────────────────────────────────────────────────────────────────────
 st.markdown("""
 <div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;
-            color:#8b949e;padding-bottom:12px;border-bottom:1px solid #30363d;
+            color:var(--text-color);opacity:0.7;padding-bottom:12px;border-bottom:1px solid rgba(128,128,128,0.2);
             margin-bottom:20px;">
     📁  Xử lý Dữ liệu Ghi âm/Ghi hình
 </div>
@@ -69,7 +72,7 @@ col_up, col_q = st.columns(2, gap="medium")
 
 with col_up:
     st.markdown('<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;'
-                'color:#8b949e;margin-bottom:10px;">① Tải lên Dữ liệu ghi âm / ghi hình </div>',
+                'color:var(--text-color);opacity:0.7;margin-bottom:10px;">① Tải lên Dữ liệu ghi âm / ghi hình </div>',
                 unsafe_allow_html=True)
 
     uploaded = st.file_uploader(
@@ -78,7 +81,6 @@ with col_up:
         label_visibility = "collapsed",
     )
 
-    # Lưu bytes ngay — Streamlit xóa uploaded object sau mỗi rerun
     if uploaded is not None:
         if uploaded.name != st.session_state.b_file_name:
             st.session_state.b_file_bytes   = uploaded.read()
@@ -91,30 +93,32 @@ with col_up:
             st.session_state.b_audio_info   = {}
             st.session_state.b_result_text  = ""
             st.session_state.b_show_full    = False
+            st.session_state.b_summary_text = None
+            st.session_state.b_metrics      = {}
 
     st.markdown("""
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">
-        <span style="font-size:10px;padding:2px 10px;border-radius:20px;background:#1e2530;
-                     border:1px solid #30363d;color:#8b949e;font-family:monospace;">.mp3</span>
-        <span style="font-size:10px;padding:2px 10px;border-radius:20px;background:#1e2530;
-                     border:1px solid #30363d;color:#8b949e;font-family:monospace;">.wav</span>
-        <span style="font-size:10px;padding:2px 10px;border-radius:20px;background:#1e2530;
-                     border:1px solid #30363d;color:#8b949e;font-family:monospace;">.mp4</span>
-        <span style="font-size:10px;padding:2px 10px;border-radius:20px;background:#1e2530;
-                     border:1px solid #30363d;color:#8b949e;font-family:monospace;">.mkv</span>
-        <span style="font-size:10px;padding:2px 10px;border-radius:20px;background:#1e2530;
-                     border:1px solid #30363d;color:#8b949e;font-family:monospace;">.m4a</span>
+        <span style="font-size:10px;padding:2px 10px;border-radius:20px;background:var(--secondary-background-color);
+                     border:1px solid rgba(128,128,128,0.2);color:var(--text-color);opacity:0.8;font-family:monospace;">.mp3</span>
+        <span style="font-size:10px;padding:2px 10px;border-radius:20px;background:var(--secondary-background-color);
+                     border:1px solid rgba(128,128,128,0.2);color:var(--text-color);opacity:0.8;font-family:monospace;">.wav</span>
+        <span style="font-size:10px;padding:2px 10px;border-radius:20px;background:var(--secondary-background-color);
+                     border:1px solid rgba(128,128,128,0.2);color:var(--text-color);opacity:0.8;font-family:monospace;">.mp4</span>
+        <span style="font-size:10px;padding:2px 10px;border-radius:20px;background:var(--secondary-background-color);
+                     border:1px solid rgba(128,128,128,0.2);color:var(--text-color);opacity:0.8;font-family:monospace;">.mkv</span>
+        <span style="font-size:10px;padding:2px 10px;border-radius:20px;background:var(--secondary-background-color);
+                     border:1px solid rgba(128,128,128,0.2);color:var(--text-color);opacity:0.8;font-family:monospace;">.m4a</span>
     </div>""", unsafe_allow_html=True)
 
 with col_q:
     st.markdown('<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;'
-                'color:#8b949e;margin-bottom:10px;">③ Hàng đợi xử lý</div>',
+                'color:var(--text-color);opacity:0.7;margin-bottom:10px;">③ Hàng đợi xử lý</div>',
                 unsafe_allow_html=True)
 
     if not st.session_state.b_file_name:
         st.markdown("""
-        <div style="background:#161b22;border:1px solid #30363d;border-radius:8px;
-                    padding:32px;text-align:center;color:#484f58;font-size:13px;">
+        <div style="background:var(--secondary-background-color);border:1px solid rgba(128,128,128,0.2);border-radius:8px;
+                    padding:32px;text-align:center;color:var(--text-color);opacity:0.7;font-size:13px;">
             Chưa có file nào được tải lên
         </div>""", unsafe_allow_html=True)
     else:
@@ -125,17 +129,17 @@ with col_q:
         mb      = st.session_state.b_file_size / 1_000_000
 
         st.markdown(f"""
-        <div style="background:#161b22;border:1px solid #30363d;
-                    border-radius:8px;overflow:hidden;">
-            <div style="background:#1e2530;padding:8px 14px;font-size:10px;
-                        letter-spacing:1.5px;text-transform:uppercase;color:#8b949e;
-                        border-bottom:1px solid #30363d;">Danh sách file</div>
+        <div style="background:var(--background-color);border:1px solid rgba(128,128,128,0.2);
+                    border-radius:8px;overflow:hidden;box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <div style="background:var(--secondary-background-color);padding:8px 14px;font-size:10px;
+                        letter-spacing:1.5px;text-transform:uppercase;color:var(--text-color);opacity:0.8;
+                        border-bottom:1px solid rgba(128,128,128,0.2);">Danh sách file</div>
             <div style="padding:12px 14px;display:flex;align-items:center;gap:12px;">
                 <span style="font-size:18px;">🎵</span>
-                <span style="flex:1;font-size:12px;color:#e6edf3;overflow:hidden;
+                <span style="flex:1;font-size:12px;color:var(--text-color);font-weight:bold;overflow:hidden;
                              text-overflow:ellipsis;white-space:nowrap;">
                     {st.session_state.b_file_name}</span>
-                <span style="font-size:10px;color:#8b949e;font-family:monospace;
+                <span style="font-size:10px;color:var(--text-color);opacity:0.7;font-family:monospace;
                              white-space:nowrap;">{mb:.1f} MB</span>
                 <span style="font-size:10px;font-weight:700;padding:2px 10px;
                              border-radius:10px;white-space:nowrap;
@@ -147,19 +151,19 @@ with col_q:
         if st.session_state.b_audio_info.get("ok"):
             ai = st.session_state.b_audio_info
             st.markdown(
-                f'<div style="margin-top:6px;font-size:11px;color:#484f58;'
+                f'<div style="margin-top:6px;font-size:11px;color:var(--text-color);opacity:0.8;'
                 f'font-family:monospace;padding-left:2px;">'
                 f'⏱ {ai["duration_str"]} &nbsp;·&nbsp; '
                 f'🔊 {ai["sample_rate"]} Hz &nbsp;·&nbsp; Mono</div>',
                 unsafe_allow_html=True,
             )
 
-st.markdown("<hr style='border-color:#30363d;margin:20px 0 16px;'>",
+st.markdown("<hr style='border-color:rgba(128,128,128,0.2);margin:20px 0 16px;'>",
             unsafe_allow_html=True)
 
 # ── Hàng 2: Cấu hình ─────────────────────────────────────────────────────────
 st.markdown('<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;'
-            'color:#8b949e;margin-bottom:14px;">② Cấu hình xử lý</div>',
+            'color:var(--text-color);opacity:0.7;margin-bottom:14px;">② Cấu hình xử lý</div>',
             unsafe_allow_html=True)
 
 enable_diar = True
@@ -220,6 +224,7 @@ if run_btn and has_file:
     st.session_state.b_stats     = {}
     st.session_state.b_show_full = False
     st.session_state.b_session_name = session_name
+    st.session_state.b_metrics      = {}
 
     progress = st.progress(0, text="Đang chuẩn bị...")
     t_pipeline_start = time.perf_counter()
@@ -244,13 +249,11 @@ if run_btn and has_file:
         t_b1 = time.perf_counter() - t0
         progress.progress(25, text="✅ Bước 1 — Convert xong!")
 
-        # B2: Transcribe — truyền language từ UI vào model
+        # B2: Transcribe
         t0 = time.perf_counter()
         progress.progress(26, text="Bước 2: Nhận dạng giọng nói...")
         stt_app = _get_stt()
 
-        # Cập nhật ngôn ngữ theo lựa chọn của người dùng
-        # language="auto" → bỏ prefix, để Whisper tự detect
         lang_code = None if language == "auto" else language
         if hasattr(stt_app, "tokenizer") and hasattr(stt_app.tokenizer, "set_prefix_tokens"):
             stt_app.tokenizer.set_prefix_tokens(
@@ -300,40 +303,36 @@ if run_btn and has_file:
         st.session_state.b_processed = True
         t_b5 = time.perf_counter() - t0
 
-        # Dọn file WAV tạm sau khi đã xử lý xong
         try:
             if wav_path and os.path.exists(wav_path):
                 os.remove(wav_path)
                 st.session_state.b_wav_path = None
         except OSError:
-            pass  # không crash nếu không xóa được
+            pass 
 
         t_total = time.perf_counter() - t_pipeline_start
         dur_sec = audio_info.get("duration_sec", 1)
         dur_str = audio_info.get("duration_str", "?")
         n_words = len(raw_text.split())
-        rtf     = t_total / dur_sec if dur_sec > 0 else 0
 
-        print("\n" + "═"*55)
-        print(" 📊 BÁO CÁO HIỆU NĂNG HỆ THỐNG NPU ".center(55))
-        print("═"*55)
-        print(f" 🎵 Audio gốc : {dur_str} | Tổng từ: {n_words} từ")
-        print(f" 🗣 Lượt nói  : {len(merged)} turns")
-        print("─"*55)
-        print(f" B1 | Convert file     : {t_b1:>7.2f}s")
-        print(f" B2 | STT (Whisper)    : {t_b2:>7.2f}s")
-        print(f" B3 | Diarize          : {t_b3:>7.2f}s")
-        print(f" B4 | Align & Gom câu  : {t_b4:>7.2f}s")
-        print(f" B5 | Punctuation      : {t_b5:>7.2f}s")
-        print("─"*55)
-        print(f" ⏱  TỔNG THỜI GIAN   : {t_total:>7.2f}s")
-        print(f" 🚀 HỆ SỐ RTF        : {rtf:>7.3f}x")
-        print("═"*55 + "\n")
+        # <-- Thay đổi 1: LƯU METRICS VÀO SESSION STATE VÀ KHÔNG IN BẢNG BÁO CÁO -->
+        st.session_state.b_metrics = {
+            "dur_str": dur_str,
+            "dur_sec": dur_sec,
+            "n_words": n_words,
+            "t_b1": t_b1,
+            "t_b2": t_b2,
+            "t_b3": t_b3,
+            "t_b4": t_b4,
+            "t_b5": t_b5,
+            "t_stt_total": t_total
+        }
+        
+        print(f"\n✅ STT hoàn tất ({dur_str}). Đang chờ quá trình Tóm tắt để in báo cáo tổng...\n")
 
-        # Cập nhật thanh tiến trình trên Web gọn gàng
         progress.progress(
             100,
-            text=f"✅ Hoàn tất! Đã xử lý {dur_str} audio chỉ trong {int(t_total//60)} phút {int(t_total%60)} giây."
+            text=f"✅ Hoàn tất! Đã xử lý STT cho {dur_str} audio. Hãy tiếp tục gán tên và tóm tắt."
         )
 
     except Exception as e:
@@ -343,10 +342,10 @@ if run_btn and has_file:
 
 # ── Gán nhãn người nói ────────────────────────────────────────────────────────
 if st.session_state.b_processed and st.session_state.b_stats:
-    st.markdown("<hr style='border-color:#30363d;margin:24px 0 16px;'>",
+    st.markdown("<hr style='border-color:rgba(128,128,128,0.2);margin:24px 0 16px;'>",
                 unsafe_allow_html=True)
     st.markdown('<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;'
-                'color:#8b949e;margin-bottom:14px;">Gán tên người nói</div>',
+                'color:var(--text-color);opacity:0.7;margin-bottom:14px;">Gán tên người nói</div>',
                 unsafe_allow_html=True)
 
     name_map = speaker_editor(st.session_state.b_stats, key_prefix="b_spk")
@@ -358,17 +357,16 @@ if st.session_state.b_processed and st.session_state.b_stats:
 
 # ── Transcript review ─────────────────────────────────────────────────────────
 if st.session_state.b_processed and st.session_state.b_turns:
-    st.markdown("<hr style='border-color:#30363d;margin:24px 0 16px;'>",
+    st.markdown("<hr style='border-color:rgba(128,128,128,0.2);margin:24px 0 16px;'>",
                 unsafe_allow_html=True)
 
     turns = st.session_state.b_turns
 
-    # Header + nút toggle xem đầy đủ
     col_title, col_toggle = st.columns([3, 1])
     with col_title:
         st.markdown(
             '<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;'
-            'color:#8b949e;margin-bottom:14px;">④ Kết quả — Transcript</div>',
+            'color:var(--text-color);opacity:0.7;margin-bottom:14px;">④ Kết quả — Transcript</div>',
             unsafe_allow_html=True,
         )
     with col_toggle:
@@ -380,56 +378,83 @@ if st.session_state.b_processed and st.session_state.b_turns:
             st.rerun()
 
     if st.session_state.b_show_full:
-        # Toàn bộ transcript, có thể chỉnh sửa từng dòng
         show_full(turns, editable=True)
-        # Lưu lại text đã sửa (text_area cập nhật trực tiếp vào t.text qua editable mode)
         if st.button("💾 Lưu chỉnh sửa", type="primary"):
             st.session_state.b_turns = turns
             st.success("Đã lưu chỉnh sửa")
     else:
-        # Preview 4 lượt đầu
         show_preview(turns, max_turns=4)
 
     st.markdown("<div style='margin:16px 0 8px;'></div>", unsafe_allow_html=True)
 
-    # ── Xuất file ────────────────────────────────────────────────────────────
+    # ── Tóm tắt & Xuất file ──────────────────────────────────────────────────
+    st.markdown("<hr style='border-color:rgba(128,128,128,0.2);margin:24px 0 16px;'>", unsafe_allow_html=True)
+    st.markdown('<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-color);opacity:0.7;margin-bottom:14px;">⑤ Tóm tắt & Xuất Biên Bản</div>', unsafe_allow_html=True)
+
     safe_session_name = st.session_state.b_session_name.replace(" ", "_")
 
-    # Layout nút xuất: 2 cột nếu chọn TXT, full width nếu chỉ DOCX
-    if export_fmt == "txt":
-        col_docx, col_txt = st.columns(2)
-    else:
-        col_docx = st.container()
-        col_txt  = None
+    # <-- Thay đổi 2: TẠO THANH TIẾN TRÌNH VÀ IN BẢNG BÁO CÁO Ở ĐÂY -->
+    if st.button("🤖 Chạy Tóm tắt Nội dung", use_container_width=True):
+        summary_progress = st.progress(0, text="Khởi động NPU tóm tắt...")
 
-    with col_docx:
-        try:
-            docx_bytes = export_to_docx(
-                turns        = st.session_state.b_turns,
-                session_name = st.session_state.b_session_name,
-            )
-            st.download_button(
-                label               = "📄  Xuất biên bản DOCX",
-                data                = docx_bytes,
-                file_name           = f"Bien_ban_{safe_session_name}.docx",
-                mime                = "application/vnd.openxmlformats-officedocument"
-                                      ".wordprocessingml.document",
-                type                = "primary",
-                use_container_width = True,
-            )
-        except FileNotFoundError as e:
-            st.error(str(e))
+        def update_progress(pct, msg):
+            safe_pct = max(0, min(100, pct)) 
+            summary_progress.progress(safe_pct, text=f"NPU: {msg}")
 
-    if col_txt is not None:
-        with col_txt:
-            lines = [
-                f"[{int(t.start//60):02d}:{int(t.start%60):02d}] {t.speaker}: {t.text}"
-                for t in st.session_state.b_turns
-            ]
-            st.download_button(
-                label               = "📋  Xuất TXT Transcript",
-                data                = "\n".join(lines).encode("utf-8"),
-                file_name           = f"transcript_{stem}.txt",
-                mime                = "text/plain",
-                use_container_width = True,
-            )
+        result = summarize(st.session_state.b_turns, progress_callback=update_progress)
+        
+        if result.ok:
+            st.session_state.b_summary_text = result.summary.strip()
+            summary_progress.progress(100, text=f"✅ Đã tóm tắt thành công! ({result.elapsed_sec}s)")
+            st.success("✅ Đã tóm tắt thành công!")
+
+            m = st.session_state.b_metrics
+            if m:
+                t_b6 = result.elapsed_sec
+                t_total_final = m["t_stt_total"] + t_b6
+                dur_sec = m["dur_sec"]
+                rtf = t_total_final / dur_sec if dur_sec > 0 else 0
+
+                print("\n" + "═"*55)
+                print(" 📊 BÁO CÁO HIỆU NĂNG HỆ THỐNG NPU (TOÀN QUY TRÌNH) ".center(55))
+                print("═"*55)
+                print(f" 🎵 Audio gốc : {m['dur_str']} | Tổng từ: {m['n_words']} từ")
+                print(f" 🗣 Lượt nói  : {len(st.session_state.b_turns)} turns")
+                print("─"*55)
+                print(f" B1 | Convert file     : {m['t_b1']:>7.2f}s")
+                print(f" B2 | STT (Whisper)    : {m['t_b2']:>7.2f}s")
+                print(f" B3 | Diarize          : {m['t_b3']:>7.2f}s")
+                print(f" B4 | Align & Gom câu  : {m['t_b4']:>7.2f}s")
+                print(f" B5 | Punctuation      : {m['t_b5']:>7.2f}s")
+                print(f" B6 | Tóm tắt (Qwen)   : {t_b6:>7.2f}s")
+                print("─"*55)
+                print(f" ⏱  TỔNG THỜI GIAN   : {t_total_final:>7.2f}s")
+                print(f" 🚀 HỆ SỐ RTF        : {rtf:>7.3f}x")
+                print("═"*55 + "\n")
+        else:
+            summary_progress.empty() 
+            st.error(f"❌ Lỗi khi tóm tắt: {result.error}")
+
+    if st.session_state.b_summary_text:
+        st.text_area("Bản xem trước Tóm tắt (Sẽ được chèn vào Word):", 
+                     st.session_state.b_summary_text, 
+                     height=200)
+
+    is_ready = bool(st.session_state.b_summary_text)
+    
+    export_data = b""
+    if is_ready:
+        export_data = export_summary_to_docx(
+            summary_text = st.session_state.b_summary_text,
+            session_name = st.session_state.b_session_name,
+        )
+
+    st.download_button(
+        label               = "📄 Xuất biên bản DOCX",
+        data                = export_data,
+        file_name           = f"Bien_ban_{safe_session_name}.docx",
+        mime                = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        type                = "primary",  
+        disabled            = not is_ready, 
+        use_container_width = True,
+    )
