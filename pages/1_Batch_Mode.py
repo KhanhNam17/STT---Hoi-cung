@@ -58,7 +58,7 @@ for k, v in _defaults.items():
 # ── Header ────────────────────────────────────────────────────────────────────
 st.markdown("""
 <div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;
-            color:#8b949e;padding-bottom:12px;border-bottom:1px solid #30363d;
+            color:var(--text-color);opacity:0.7;padding-bottom:12px;border-bottom:1px solid rgba(128,128,128,0.2);
             margin-bottom:20px;">
     📁  Xử lý Dữ liệu Ghi âm/Ghi hình
 </div>
@@ -69,7 +69,7 @@ col_up, col_q = st.columns(2, gap="medium")
 
 with col_up:
     st.markdown('<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;'
-                'color:#8b949e;margin-bottom:10px;">① Tải lên Dữ liệu ghi âm / ghi hình </div>',
+                'color:var(--text-color);opacity:0.7;margin-bottom:10px;">① Tải lên Dữ liệu ghi âm / ghi hình </div>',
                 unsafe_allow_html=True)
 
     uploaded = st.file_uploader(
@@ -94,27 +94,27 @@ with col_up:
 
     st.markdown("""
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">
-        <span style="font-size:10px;padding:2px 10px;border-radius:20px;background:#1e2530;
-                     border:1px solid #30363d;color:#8b949e;font-family:monospace;">.mp3</span>
-        <span style="font-size:10px;padding:2px 10px;border-radius:20px;background:#1e2530;
-                     border:1px solid #30363d;color:#8b949e;font-family:monospace;">.wav</span>
-        <span style="font-size:10px;padding:2px 10px;border-radius:20px;background:#1e2530;
-                     border:1px solid #30363d;color:#8b949e;font-family:monospace;">.mp4</span>
-        <span style="font-size:10px;padding:2px 10px;border-radius:20px;background:#1e2530;
-                     border:1px solid #30363d;color:#8b949e;font-family:monospace;">.mkv</span>
-        <span style="font-size:10px;padding:2px 10px;border-radius:20px;background:#1e2530;
-                     border:1px solid #30363d;color:#8b949e;font-family:monospace;">.m4a</span>
+        <span style="font-size:10px;padding:2px 10px;border-radius:20px;background:var(--secondary-background-color);
+                     border:1px solid rgba(128,128,128,0.2);color:var(--text-color);opacity:0.8;font-family:monospace;">.mp3</span>
+        <span style="font-size:10px;padding:2px 10px;border-radius:20px;background:var(--secondary-background-color);
+                     border:1px solid rgba(128,128,128,0.2);color:var(--text-color);opacity:0.8;font-family:monospace;">.wav</span>
+        <span style="font-size:10px;padding:2px 10px;border-radius:20px;background:var(--secondary-background-color);
+                     border:1px solid rgba(128,128,128,0.2);color:var(--text-color);opacity:0.8;font-family:monospace;">.mp4</span>
+        <span style="font-size:10px;padding:2px 10px;border-radius:20px;background:var(--secondary-background-color);
+                     border:1px solid rgba(128,128,128,0.2);color:var(--text-color);opacity:0.8;font-family:monospace;">.mkv</span>
+        <span style="font-size:10px;padding:2px 10px;border-radius:20px;background:var(--secondary-background-color);
+                     border:1px solid rgba(128,128,128,0.2);color:var(--text-color);opacity:0.8;font-family:monospace;">.m4a</span>
     </div>""", unsafe_allow_html=True)
 
 with col_q:
     st.markdown('<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;'
-                'color:#8b949e;margin-bottom:10px;">③ Hàng đợi xử lý</div>',
+                'color:var(--text-color);opacity:0.7;margin-bottom:10px;">③ Hàng đợi xử lý</div>',
                 unsafe_allow_html=True)
 
     if not st.session_state.b_file_name:
         st.markdown("""
-        <div style="background:#161b22;border:1px solid #30363d;border-radius:8px;
-                    padding:32px;text-align:center;color:#484f58;font-size:13px;">
+        <div style="background:var(--secondary-background-color);border:1px solid rgba(128,128,128,0.2);border-radius:8px;
+                    padding:32px;text-align:center;color:var(--text-color);opacity:0.7;font-size:13px;">
             Chưa có file nào được tải lên
         </div>""", unsafe_allow_html=True)
     else:
@@ -125,17 +125,17 @@ with col_q:
         mb      = st.session_state.b_file_size / 1_000_000
 
         st.markdown(f"""
-        <div style="background:#161b22;border:1px solid #30363d;
-                    border-radius:8px;overflow:hidden;">
-            <div style="background:#1e2530;padding:8px 14px;font-size:10px;
-                        letter-spacing:1.5px;text-transform:uppercase;color:#8b949e;
-                        border-bottom:1px solid #30363d;">Danh sách file</div>
+        <div style="background:var(--background-color);border:1px solid rgba(128,128,128,0.2);
+                    border-radius:8px;overflow:hidden;box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <div style="background:var(--secondary-background-color);padding:8px 14px;font-size:10px;
+                        letter-spacing:1.5px;text-transform:uppercase;color:var(--text-color);opacity:0.8;
+                        border-bottom:1px solid rgba(128,128,128,0.2);">Danh sách file</div>
             <div style="padding:12px 14px;display:flex;align-items:center;gap:12px;">
                 <span style="font-size:18px;">🎵</span>
-                <span style="flex:1;font-size:12px;color:#e6edf3;overflow:hidden;
+                <span style="flex:1;font-size:12px;color:var(--text-color);font-weight:bold;overflow:hidden;
                              text-overflow:ellipsis;white-space:nowrap;">
                     {st.session_state.b_file_name}</span>
-                <span style="font-size:10px;color:#8b949e;font-family:monospace;
+                <span style="font-size:10px;color:var(--text-color);opacity:0.7;font-family:monospace;
                              white-space:nowrap;">{mb:.1f} MB</span>
                 <span style="font-size:10px;font-weight:700;padding:2px 10px;
                              border-radius:10px;white-space:nowrap;
@@ -147,19 +147,19 @@ with col_q:
         if st.session_state.b_audio_info.get("ok"):
             ai = st.session_state.b_audio_info
             st.markdown(
-                f'<div style="margin-top:6px;font-size:11px;color:#484f58;'
+                f'<div style="margin-top:6px;font-size:11px;color:var(--text-color);opacity:0.8;'
                 f'font-family:monospace;padding-left:2px;">'
                 f'⏱ {ai["duration_str"]} &nbsp;·&nbsp; '
                 f'🔊 {ai["sample_rate"]} Hz &nbsp;·&nbsp; Mono</div>',
                 unsafe_allow_html=True,
             )
 
-st.markdown("<hr style='border-color:#30363d;margin:20px 0 16px;'>",
+st.markdown("<hr style='border-color:rgba(128,128,128,0.2);margin:20px 0 16px;'>",
             unsafe_allow_html=True)
 
 # ── Hàng 2: Cấu hình ─────────────────────────────────────────────────────────
 st.markdown('<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;'
-            'color:#8b949e;margin-bottom:14px;">② Cấu hình xử lý</div>',
+            'color:var(--text-color);opacity:0.7;margin-bottom:14px;">② Cấu hình xử lý</div>',
             unsafe_allow_html=True)
 
 enable_diar = True
@@ -343,10 +343,10 @@ if run_btn and has_file:
 
 # ── Gán nhãn người nói ────────────────────────────────────────────────────────
 if st.session_state.b_processed and st.session_state.b_stats:
-    st.markdown("<hr style='border-color:#30363d;margin:24px 0 16px;'>",
+    st.markdown("<hr style='border-color:rgba(128,128,128,0.2);margin:24px 0 16px;'>",
                 unsafe_allow_html=True)
     st.markdown('<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;'
-                'color:#8b949e;margin-bottom:14px;">Gán tên người nói</div>',
+                'color:var(--text-color);opacity:0.7;margin-bottom:14px;">Gán tên người nói</div>',
                 unsafe_allow_html=True)
 
     name_map = speaker_editor(st.session_state.b_stats, key_prefix="b_spk")
@@ -358,7 +358,7 @@ if st.session_state.b_processed and st.session_state.b_stats:
 
 # ── Transcript review ─────────────────────────────────────────────────────────
 if st.session_state.b_processed and st.session_state.b_turns:
-    st.markdown("<hr style='border-color:#30363d;margin:24px 0 16px;'>",
+    st.markdown("<hr style='border-color:rgba(128,128,128,0.2);margin:24px 0 16px;'>",
                 unsafe_allow_html=True)
 
     turns = st.session_state.b_turns
@@ -368,7 +368,7 @@ if st.session_state.b_processed and st.session_state.b_turns:
     with col_title:
         st.markdown(
             '<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;'
-            'color:#8b949e;margin-bottom:14px;">④ Kết quả — Transcript</div>',
+            'color:var(--text-color);opacity:0.7;margin-bottom:14px;">④ Kết quả — Transcript</div>',
             unsafe_allow_html=True,
         )
     with col_toggle:
@@ -429,7 +429,7 @@ if st.session_state.b_processed and st.session_state.b_turns:
             st.download_button(
                 label               = "📋  Xuất TXT Transcript",
                 data                = "\n".join(lines).encode("utf-8"),
-                file_name           = f"transcript_{stem}.txt",
+                file_name           = f"transcript_{safe_session_name}.txt",
                 mime                = "text/plain",
                 use_container_width = True,
             )
