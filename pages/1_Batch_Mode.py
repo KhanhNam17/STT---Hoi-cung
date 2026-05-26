@@ -58,6 +58,13 @@ for k, v in _defaults.items():
     if k not in st.session_state:
         st.session_state[k] = v
 
+st.set_page_config(
+    page_title = "Batch Mode — Hỏi Cung",
+    page_icon  = "🎙️",
+    layout     = "wide",
+    initial_sidebar_state = "expanded",
+)
+
 # ── Header ────────────────────────────────────────────────────────────────────
 st.markdown("""
 <div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;
@@ -422,7 +429,7 @@ if st.session_state.b_processed and st.session_state.b_turns:
                 print(f" 🗣 Lượt nói  : {len(st.session_state.b_turns)} turns")
                 print("─"*55)
                 print(f" B1 | Convert file     : {m['t_b1']:>7.2f}s")
-                print(f" B2 | STT (Whisper)    : {m['t_b2']:>7.2f}s")
+                print(f" B2 | Transcribe (Whisper)    : {m['t_b2']:>7.2f}s")
                 print(f" B3 | Diarize          : {m['t_b3']:>7.2f}s")
                 print(f" B4 | Align & Gom câu  : {m['t_b4']:>7.2f}s")
                 print(f" B5 | Punctuation      : {m['t_b5']:>7.2f}s")
