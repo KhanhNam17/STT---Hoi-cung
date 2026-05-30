@@ -1,38 +1,83 @@
 # requirements.txt — STT App
 # Cài đặt: pip install -r requirements.txt
 #
+# ⚠️  PIN CHẶT để tránh lỗi "resolution-too-deep".
+#     Nguyên nhân: diart + pyannote.audio cùng kéo torch/onnxruntime với range
+#     khác nhau → pip backtrack qua hàng nghìn tổ hợp. Pin cứng = pip khỏi tìm.
+#
 # Lưu ý: qai_hub_models cài riêng bằng lệnh có [extra]:
 #   pip install "qai_hub_models[whisper-large-v3-turbo]"
 
+# ── KHOÁ NỀN: numpy < 2.0 ────────────────────────────────
+# numpy 2.0 là thủ phạm ẩn số 1 gây backtrack — torch 2.2 và pyannote
+# đều cap numpy < 2. Đặt cap này TRƯỚC mọi thứ.
+numpy>=1.24.0,<2.0.0
+
+# ── AI: PyTorch (cây phụ thuộc lớn nhất — pin CHÍNH XÁC) ──
+torch==2.2.2
+torchaudio==2.2.2
+
+# ── AI: Speaker Diarization (offline — Batch Mode) ───────
+# Yêu cầu HF_TOKEN trong .env và chấp nhận điều khoản:
+#   https://huggingface.co/pyannote/speaker-diarization-3.1
+#   https://huggingface.co/pyannote/segmentation-3.0
+#   https://huggingface.co/pyannote/embedding
+pyannote.audio==3.1.1
+# speechbrain PHẢI < 1.0 — bản 1.0/1.1 lazy-import 'integrations.k2_fsa' và crash
+# khi k2 chưa cài (xem core/diarization/streaming.py). pyannote 3.1.1 không pin nên OK.
+speechbrain==0.5.16
+
+# ── Real-time diarization (Live Mode, diart backend) ─────
+# Streaming wrapper trên pyannote — sliding window 5s, step 500ms
+# Bật bằng env: DIARIZATION_BACKEND=diart
+# diart 0.9.1 tương thích pyannote.audio 3.1.x + torch 2.2.x
+diart==0.9.1
+onnxruntime==1.17.3      # pin để diart + qai_hub không tranh nhau
+scikit-learn==1.4.2      # AgglomerativeClustering cho final re-cluster
+rx==3.2.0                # diart dùng RxPY cho streaming pipeline
+
+# ── (TUỲ CHỌN) Forced alignment — gán speaker theo TỪNG TỪ ở "Hoàn thiện" ──
+# KHÔNG bắt buộc: thiếu nó, aligner tự fallback ratio-based (vẫn ra đa-speaker,
+# chỉ kém chính xác ranh giới từ). CÀI RIÊNG nếu muốn độ chính xác cao nhất:
+#
+#   pip install "setuptools<81" wheel
+#   pip install --no-build-isolation "stable-ts==2.17.3"
+#
+# (stable-ts kéo openai-whisper==20231117 cũ, setup.py dùng pkg_resources mà
+#  setuptools>=81 đã bỏ → phải hạ setuptools + tắt build isolation.)
+# stable-ts==2.17.3   # bỏ comment nếu đã cài thành công bằng lệnh trên
+
+# ── (TUỲ CHỌN) Streaming Sortformer — diarization SOTA (như WhisperLiveKit) ──
+# Bật bằng: BATCH_DIARIZATION_BACKEND=sortformer  hoặc  LIVE_FINAL_BACKEND=sortformer
+# Model: nvidia/diar_streaming_sortformer_4spk-v2 (tối đa 4 người nói).
+# CÀI RIÊNG (nặng; trên Windows có thể khó):
+#   pip install Cython packaging
+#   pip install "nemo_toolkit[asr]"
+#   # nếu bản pypi lỗi, thử bản main:
+#   # pip install "git+https://github.com/NVIDIA/NeMo.git@main#egg=nemo_toolkit[asr]"
+# nemo_toolkit[asr]   # bỏ comment nếu đã cài thành công
+
+# ── AI: Qualcomm Whisper ─────────────────────────────────
+# Cài bằng lệnh riêng sau khi cài file này:
+#   pip install "qai_hub_models[whisper-large-v3-turbo]"
+qai_hub>=0.9.0
+
 # ── Streamlit ────────────────────────────────────────────
-streamlit>=1.35.0
+streamlit>=1.35.0,<2.0.0
 # st.audio_input (ghi âm microphone) yêu cầu >= 1.33
 
 # ── Biến môi trường ──────────────────────────────────────
-python-dotenv>=1.0.0
+python-dotenv>=1.0.0,<2.0.0
 
 # ── Xử lý audio ─────────────────────────────────────────
-librosa>=0.10.0
-soundfile>=0.12.1
-
-# ── AI: PyTorch (backend cho Whisper + pyannote) ─────────
-torch>=2.2.0
-torchaudio>=2.2.0
-
-# ── AI: Qualcomm Whisper ─────────────────────────────────
-# Cài bằng lệnh riêng:
-#   pip install "qai_hub_models[whisper-large-v3-turbo]"
-qai_hub
-
-# ── AI: Speaker Diarization ──────────────────────────────
-# Yêu cầu HF_TOKEN trong .env và chấp nhận điều khoản:
-#   https://huggingface.co/pyannote/speaker-diarization-3.1
-pyannote.audio>=3.1.0
+librosa>=0.10.0,<0.11.0
+soundfile>=0.12.1,<0.13.0
 
 # ── Xuất DOCX ────────────────────────────────────────────
-python-docx>=1.1.0
+python-docx>=1.1.0,<2.0.0
 
 # ── Tiện ích ─────────────────────────────────────────────
-pandas>=2.0.0
-numpy>=1.24.0
-tqdm>=4.66.0
+pandas>=2.0.0,<3.0.0
+tqdm>=4.66.0,<5.0.0
+sherpa_onnx
+sounddevice

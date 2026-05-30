@@ -2,12 +2,6 @@
 #
 # Mục đích: Chuyển đổi giọng nói → văn bản (STT)
 #   Backend: Qualcomm AI Hub Models — whisper_large_v3_turbo
-#
-# Thay đổi so với file gốc:
-#   - XOÁ run_transcription(), verify_files() — không dùng trong app
-#   - XOÁ ON_DEVICE, QUALCOMM_DEVICE hardcode → đọc từ .env
-#   - GIỮ NGUYÊN load_model(), transcribe_file(), get_duration()
-#   - THÊM block test cuối file
 
 import os
 import time

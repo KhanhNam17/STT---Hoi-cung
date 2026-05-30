@@ -19,7 +19,7 @@ SEG_STEP_SIZE     = 0.5     # bước trượt
 EMBED_SAMPLE_RATE = 16000
 
 # Import từ các file utils có sẵn của bạn
-from diarizer import SpeakerSegment, postprocess_segments, validate_wav
+from core.diarizer import SpeakerSegment, postprocess_segments, validate_wav
 
 
 def _build_npu_session(onnx_path: str):

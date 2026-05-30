@@ -10,8 +10,29 @@ load_dotenv()
 from core.converter import convert_from_bytes, get_audio_info
 from core.transcriber import load_model, transcribe_file
 from core.diarizer import get_speaker_stats
-from core.diarizer_nexa import load_diarizer_nexa as load_diarizer
-from core.diarizer_nexa import diarize_file_nexa as diarize_file
+
+# Backend diarization cho BATCH (độc lập với Live Mode).
+#   BATCH_DIARIZATION_BACKEND = pyannote (mặc định) | sortformer | diart | nexa
+#     pyannote   — offline pyannote 3.1, chính xác, ổn định (mặc định)
+#     sortformer — NVIDIA Streaming Sortformer (SOTA, như WhisperLiveKit); cần NeMo
+#     diart      — diart offline (kém hơn cho file)
+#     nexa       — Nexa NPU CLI
+# Live Mode vẫn đọc DIARIZATION_BACKEND riêng.
+_DIAR_BACKEND = os.getenv("BATCH_DIARIZATION_BACKEND", "pyannote").strip().lower()
+if _DIAR_BACKEND == "sortformer":
+    # Dùng BRIDGE (subprocess sang sortformer_env) — KHÔNG import NeMo ở app env.
+    from core.diarization.sortformer_bridge import load_diarizer_sortformer as load_diarizer
+    from core.diarization.sortformer_bridge import diarize_file_sortformer as diarize_file
+elif _DIAR_BACKEND == "diart":
+    from core.diarization.streaming import load_diarizer_diart as load_diarizer
+    from core.diarization.streaming import diarize_file_diart as diarize_file
+elif _DIAR_BACKEND == "nexa":
+    from core.diarizer_nexa import load_diarizer_nexa as load_diarizer
+    from core.diarizer_nexa import diarize_file_nexa as diarize_file
+else:   # pyannote — offline, chính xác nhất cho file
+    _DIAR_BACKEND = "pyannote"
+    from core.diarizer import load_diarizer, diarize_file
+print(f"[BatchMode] Diarization backend = {_DIAR_BACKEND}")
 from core.aligner import align, merge_consecutive, rename_turns, parse_whisper_segments
 from core.punctuation_restorer import restore
 from core.test_qwen import summarize
@@ -299,6 +320,8 @@ if run_btn and has_file:
         progress.progress(76, text="Bước 4: Ghép nối transcript...")
         turns  = align(segments, full_text=raw_text, wav_path=wav_path, language=language if language != "auto" else "vi")
         merged = merge_consecutive(turns, gap_limit=1.5)
+        from core.aligner import smooth_short_turns
+        merged = smooth_short_turns(merged, max_words=4, max_dur=1.2, gap_limit=1.5)
         t_b4 = time.perf_counter() - t0
 
         # B5: Punctuation
@@ -442,26 +465,41 @@ if st.session_state.b_processed and st.session_state.b_turns:
             summary_progress.empty() 
             st.error(f"❌ Lỗi khi tóm tắt: {result.error}")
 
+    st.caption("ℹ️ Tóm tắt là TUỲ CHỌN (cần Qwen/NPU). Bỏ qua vẫn xuất được DOCX "
+               "chứa transcript đầy đủ theo từng người nói.")
+
     if st.session_state.b_summary_text:
-        st.text_area("Bản xem trước Tóm tắt (Sẽ được chèn vào Word):", 
-                     st.session_state.b_summary_text, 
+        st.text_area("Bản xem trước Tóm tắt (Sẽ được chèn vào Word):",
+                     st.session_state.b_summary_text,
                      height=200)
 
-    is_ready = bool(st.session_state.b_summary_text)
-    
+    # Xuất được DOCX chỉ cần CÓ TRANSCRIPT — không bắt buộc phải có tóm tắt.
+    is_ready = bool(st.session_state.b_turns)
+
     export_data = b""
     if is_ready:
-        export_data = export_summary_to_docx(
-            summary_text = st.session_state.b_summary_text,
-            session_name = st.session_state.b_session_name,
-        )
+        if st.session_state.b_summary_text:
+            # Có tóm tắt → xuất bản tóm tắt
+            export_data = export_summary_to_docx(
+                summary_text = st.session_state.b_summary_text,
+                session_name = st.session_state.b_session_name,
+            )
+        else:
+            # Không tóm tắt → xuất full transcript (đa speaker) làm baseline
+            from components.export_docx import export_to_docx
+            export_data = export_to_docx(
+                turns        = st.session_state.b_turns,
+                session_name = st.session_state.b_session_name,
+            )
 
+    _has_summary = bool(st.session_state.b_summary_text)
     st.download_button(
-        label               = "📄 Xuất biên bản DOCX",
+        label               = "📄 Xuất biên bản DOCX (tóm tắt)" if _has_summary
+                               else "📄 Xuất biên bản DOCX (transcript đầy đủ)",
         data                = export_data,
         file_name           = f"Bien_ban_{safe_session_name}.docx",
         mime                = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        type                = "primary",  
-        disabled            = not is_ready, 
+        type                = "primary",
+        disabled            = not is_ready,
         use_container_width = True,
     )

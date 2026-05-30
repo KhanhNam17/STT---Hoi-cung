@@ -1,20 +1,5 @@
 # core/aligner.py  —  v4 (WhisperX-style)
 #
-# KIẾN TRÚC MỚI — theo WhisperX assign_word_speakers:
-#
-#   Vấn đề cũ (v1–v3):
-#     Qualcomm Whisper chỉ trả về full_text (str).
-#     Aligner cũ dùng ratio/word-count để chia text → sai về mặt lý thuyết:
-#     mỗi người nói tốc độ khác nhau, câu dài/ngắn không đều → drift không tránh khỏi.
-#
-#   Giải pháp (v4):
-#     Bước 0: Forced alignment (stable-ts) — lấy timestamp từng từ từ audio + text
-#             Không cần re-transcribe, chỉ "canh" text đã có vào waveform.
-#     Bước 1: assign_word_speakers — với mỗi từ có timestamp, tìm speaker đang
-#             nói tại thời điểm đó (theo pyannote segments). O(W×S) nhưng đủ nhanh.
-#     Bước 2: group_words_to_turns — gộp các từ liên tiếp cùng speaker thành turn.
-#
-#   Kết quả: mỗi từ được gán đúng speaker theo timestamp thật → không còn drift.
 #
 #   Dependency: stable-ts  (pip install stable-ts)
 #     stable-ts chạy forced alignment bằng cross-attention của Whisper encoder,
@@ -535,6 +520,47 @@ def merge_consecutive(
         else:
             merged.append(current)
     return merged
+
+
+def smooth_short_turns(
+    turns       : List[AlignedTurn],
+    max_words   : int   = 4,
+    max_dur     : float = 1.2,
+    gap_limit   : float = 1.5,
+) -> List[AlignedTurn]:
+    """Gộp các turn NGẮN bị kẹp giữa 2 turn cùng speaker (mẫu A → b → A).
+
+    Sửa lỗi 'phân mảnh' khi nói nhanh/chồng tiếng: 1 câu của 1 người bị diarizer
+    cắt vụn sang nhiều speaker (vd 'Mượn / của bố / và mượn' → 00/02/00).
+    Turn b ngắn (≤ max_words từ HOẶC ≤ max_dur giây) kẹp giữa A→A → gán về A,
+    rồi gộp lại. Lặp tới khi ổn định. Trả list mới.
+    """
+    if len(turns) < 3:
+        return turns
+
+    changed = True
+    cur = list(turns)
+    while changed:
+        changed = False
+        out = [cur[0]]
+        i = 1
+        while i < len(cur) - 1:
+            prev, mid, nxt = out[-1], cur[i], cur[i + 1]
+            n_words = len(mid.text.split())
+            dur     = mid.end - mid.start
+            if (prev.speaker == nxt.speaker
+                    and mid.speaker != prev.speaker
+                    and (n_words <= max_words or dur <= max_dur)):
+                # gán mid về speaker A (prev) → sẽ được gộp ở merge sau
+                out.append(AlignedTurn(speaker=prev.speaker, start=mid.start,
+                                       end=mid.end, text=mid.text, confidence=mid.confidence))
+                changed = True
+            else:
+                out.append(mid)
+            i += 1
+        out.append(cur[-1])
+        cur = merge_consecutive(out, gap_limit=gap_limit)
+    return cur
 
 
 def format_timestamp(seconds: float) -> str:

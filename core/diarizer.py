@@ -93,6 +93,14 @@ def load_diarizer():
     except ImportError:
         raise ImportError("Chạy: pip install pyannote.audio")
 
+    # pyannote.audio >= 3.3 dùng kwarg `token=`, còn 3.1.x dùng `use_auth_token=`.
+    # Thử lần lượt để tương thích cả 2 version.
+    def _from_pretrained(model, tok):
+        try:
+            return Pipeline.from_pretrained(model, token=tok)
+        except TypeError:
+            return Pipeline.from_pretrained(model, use_auth_token=tok)
+
     print(f"⏳ Loading diarization pipeline: {DIARIZATION_MODEL}")
 
     if _IS_PRECISION:
@@ -104,10 +112,7 @@ def load_diarizer():
                 "Hoặc đổi về community-1:\n"
                 "DIARIZATION_MODEL=pyannote/speaker-diarization-community-1"
             )
-        pipeline = Pipeline.from_pretrained(
-            DIARIZATION_MODEL,
-            token=PYANNOTE_API_KEY,
-        )
+        pipeline = _from_pretrained(DIARIZATION_MODEL, PYANNOTE_API_KEY)
         print("   Mode: Cloud (pyannoteAI) — cần internet")
 
     else:
@@ -117,15 +122,23 @@ def load_diarizer():
                 "Thiếu HF_TOKEN — thêm vào file .env:\n"
                 "HF_TOKEN=hf_xxxxxxxxxxxxxxxxxxxx"
             )
-        pipeline = Pipeline.from_pretrained(
-            DIARIZATION_MODEL,
-            token=HF_TOKEN,
-        )
+        pipeline = _from_pretrained(DIARIZATION_MODEL, HF_TOKEN)
         if torch.cuda.is_available():
             pipeline = pipeline.to(torch.device("cuda"))
             print("   Device: CUDA")
         else:
             print("   Device: CPU")
+
+    # from_pretrained() trả None khi tải thất bại (gated / version không hợp).
+    # Bắt sớm để báo lỗi rõ ràng thay vì crash 'NoneType is not callable' lúc chạy.
+    if pipeline is None:
+        raise ValueError(
+            f"Không tải được pipeline '{DIARIZATION_MODEL}'.\n"
+            f"  • community-1 cần pyannote.audio >= 3.3 (máy đang có bản cũ hơn).\n"
+            f"  • Hoặc chưa chấp nhận điều kiện model trên HuggingFace.\n"
+            f"→ KHUYẾN NGHỊ: đổi trong .env:\n"
+            f"  DIARIZATION_MODEL=pyannote/speaker-diarization-3.1"
+        )
 
     label = ("community-1" if _IS_COMMUNITY
               else "precision-2 (cloud)" if _IS_PRECISION
@@ -158,8 +171,11 @@ def validate_wav(wav_path: str) -> tuple[bool, str]:
             return False, "File rỗng (0 frames)"
         if sample_rate != 16000:
             return False, f"Sample rate không đúng: {sample_rate}Hz (cần 16000Hz)"
-        if channels != 1:
-            return False, f"Không phải mono: {channels} channels (cần 1)"
+        # Stereo CHẤP NHẬN ĐƯỢC: load_audio() tự downmix sang mono (trung bình kênh).
+        if channels not in (1, 2):
+            return False, f"Số kênh không hỗ trợ: {channels} (cần mono hoặc stereo)"
+        if channels == 2:
+            print("   [diarizer] File stereo → sẽ tự downmix sang mono khi load.")
 
         duration = frames / sample_rate
         if duration < 0.5:
@@ -175,14 +191,18 @@ def validate_wav(wav_path: str) -> tuple[bool, str]:
 # Hàm 3: Load audio thành tensor
 # ────────────────────────────────────────────────────────────────────────────
 def load_audio(wav_path: str):
-    """Đọc WAV bằng soundfile → torch tensor (1, time)."""
+    """Đọc WAV bằng soundfile → torch tensor (1, time).
+
+    Tự DOWNMIX stereo/đa kênh → mono bằng cách trung bình các kênh.
+    sf.read trả (frames,) cho mono hoặc (frames, channels) cho đa kênh.
+    """
     waveform, sample_rate = sf.read(wav_path)
     waveform = torch.tensor(waveform).float()
 
-    if len(waveform.shape) == 2:
+    if waveform.dim() == 2:                # (frames, channels) → mono
         waveform = waveform.mean(dim=1)
 
-    waveform = waveform.unsqueeze(0)
+    waveform = waveform.unsqueeze(0)       # (1, time)
     return waveform, sample_rate
 
 
@@ -643,6 +663,25 @@ if __name__ == "__main__":
     if not Path(wav_path).exists():
         print(f"\n    ❌ File không tồn tại: {wav_path}")
         sys.exit(1)
+
+    # ── Tiền xử lý qua CONVERTER (giống 1_Batch_Mode.py) ──────────────────────
+    # Diarizer cần WAV 16kHz mono. Nếu input là stereo / sample-rate khác /
+    # định dạng khác (mp3, mp4...) → convert qua ffmpeg trước khi feed.
+    print(f"\n[2.5] Tiền xử lý qua converter (cần ffmpeg)...")
+    from converter import convert_to_wav, get_audio_info
+    info = get_audio_info(wav_path)
+    needs_convert = not (info["ok"] and info["sample_rate"] == 16000 and info["channels"] == 1)
+    if needs_convert:
+        print(f"    Input: {info.get('sample_rate')}Hz {info.get('channels')}ch "
+              f"→ convert sang 16kHz mono…")
+        converted = str(Path(wav_path).with_name(Path(wav_path).stem + "_16k_mono.wav"))
+        if not convert_to_wav(wav_path, converted, sample_rate=16000, normalize=True):
+            print("    ❌ Convert thất bại — kiểm tra ffmpeg / FFMPEG_PATH trong .env")
+            sys.exit(1)
+        wav_path = converted
+        print(f"    ✅ Đã convert → {wav_path}")
+    else:
+        print("    ✅ Input đã là 16kHz mono — bỏ qua convert")
 
     print(f"\n[3] Validate: {wav_path}")
     valid, reason = validate_wav(wav_path)

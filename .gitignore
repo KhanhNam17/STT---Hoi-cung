@@ -218,6 +218,14 @@ __marimo__/
 .streamlit/secrets.toml
 .env
 
+# ── App: test audio + tuning artifacts (không commit binary nặng) ────────────
+*.wav
+!hoi_cung_v1_16k.wav
+!podcast_2_16k.wav
+tune_data/
+tuning_data/
+debug2_result.txt
+
 build_metadata_sliding_window.py
 crawler.py
 fix_podcast_metadata.py
