@@ -337,7 +337,7 @@ def postprocess_segments(
     min_duration      : float = 0.5,
     merge_gap         : float = 2.5,
     smooth_window     : int   = 3,
-    min_speaker_ratio : float = 0.08,
+    min_speaker_ratio : float = 0.0,
 ) -> list:
     """
     Làm sạch kết quả diarization — 4 bước theo thứ tự.
