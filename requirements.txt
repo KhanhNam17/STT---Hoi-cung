@@ -36,30 +36,6 @@ onnxruntime==1.17.3      # pin để diart + qai_hub không tranh nhau
 scikit-learn==1.4.2      # AgglomerativeClustering cho final re-cluster
 rx==3.2.0                # diart dùng RxPY cho streaming pipeline
 
-# ── (TUỲ CHỌN) Forced alignment — gán speaker theo TỪNG TỪ ở "Hoàn thiện" ──
-# KHÔNG bắt buộc: thiếu nó, aligner tự fallback ratio-based (vẫn ra đa-speaker,
-# chỉ kém chính xác ranh giới từ). CÀI RIÊNG nếu muốn độ chính xác cao nhất:
-#
-#   pip install "setuptools<81" wheel
-#   pip install --no-build-isolation "stable-ts==2.17.3"
-#
-# (stable-ts kéo openai-whisper==20231117 cũ, setup.py dùng pkg_resources mà
-#  setuptools>=81 đã bỏ → phải hạ setuptools + tắt build isolation.)
-# stable-ts==2.17.3   # bỏ comment nếu đã cài thành công bằng lệnh trên
-
-# ── (TUỲ CHỌN) Streaming Sortformer — diarization SOTA (như WhisperLiveKit) ──
-# Bật bằng: BATCH_DIARIZATION_BACKEND=sortformer  hoặc  LIVE_FINAL_BACKEND=sortformer
-# Model: nvidia/diar_streaming_sortformer_4spk-v2 (tối đa 4 người nói).
-# CÀI RIÊNG (nặng; trên Windows có thể khó):
-#   pip install Cython packaging
-#   pip install "nemo_toolkit[asr]"
-#   # nếu bản pypi lỗi, thử bản main:
-#   # pip install "git+https://github.com/NVIDIA/NeMo.git@main#egg=nemo_toolkit[asr]"
-# nemo_toolkit[asr]   # bỏ comment nếu đã cài thành công
-
-# ── AI: Qualcomm Whisper ─────────────────────────────────
-# Cài bằng lệnh riêng sau khi cài file này:
-#   pip install "qai_hub_models[whisper-large-v3-turbo]"
 qai_hub>=0.9.0
 
 # ── Streamlit ────────────────────────────────────────────

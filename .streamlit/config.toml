@@ -1,3 +1,21 @@
 [server]
 maxUploadSize = 2048
 
+# Tắt source-file watcher để KHÔNG còn traceback "speechbrain.k2_integration",
+# "speechbrain.lobes.models.spacy", "speechbrain.lobes.models.flair" mỗi lần
+# Streamlit rerun. Watcher cố getattr các lazy module của speechbrain — các module
+# này yêu cầu k2/spacy/flair (không cài trong sortformer_env) → raise ImportError →
+# in traceback dài. Tắt watcher → demo log sạch hoàn toàn.
+#
+# Trade-off: mất hot-reload khi sửa code. Cần restart streamlit thủ công sau khi
+# edit. Cho demo offline thì OK.
+fileWatcherType = "none"
+
+[client]
+# Bớt 1 dòng cảnh báo Streamlit về tool/dev mode khi user là người dùng cuối.
+toolbarMode = "minimal"
+
+[logger]
+# Mặc định "info" — đổi sang "warning" để bỏ các dòng INFO của Streamlit watcher
+# (vẫn giữ error/warning quan trọng).
+level = "warning"

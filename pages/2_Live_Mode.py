@@ -57,17 +57,6 @@ JOINER_PATH  = os.getenv("LIVE_JOINER",      f"{MODEL_DIR}/joiner-epoch-31-avg-1
 SAMPLE_RATE  = int(os.getenv("LIVE_SAMPLE_RATE",  "16000"))
 CHUNK_FRAMES = int(os.getenv("LIVE_CHUNK_FRAMES", "3200"))   # 200ms/chunk
 
-# API Endpoint kết nối với Nexa NPU Server
-NPU_API_URL  = os.getenv("NPU_API_URL", "http://127.0.0.1:18182/v1/audio/diarize")
-
-# Backend cho diarization real-time: "npu" (HTTP server) hoặc "diart" (Python library local)
-DIARIZATION_BACKEND = os.getenv("DIARIZATION_BACKEND", "npu").strip().lower()
-
-# Ẩn log ồn ào của NPU thread (đặt NPU_DEBUG=1 để bật lại khi cần debug)
-_NPU_DEBUG = os.getenv("NPU_DEBUG", "0").strip() == "1"
-def _npu_log(msg: str):
-    if _NPU_DEBUG:
-        print(msg, flush=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 2. GLOBAL QUEUES & LOCK (Thread-safe)
@@ -76,22 +65,384 @@ def _npu_log(msg: str):
 def get_shared_resources():
     return {
         "audio_q": _queue_module.Queue(),
-        "diar_q": _queue_module.Queue(),
-        "spk_windows": [],
-        "spk_lock": threading.Lock()
+        "audio_peak": 0.0,        # FIX #7: VU meter peak (0..1)
+        "sortformer_warm": False, # FIX #5: đã pre-warm subprocess chưa
+        # FIX #5c: incremental Sortformer cache + stop signal
+        "sortformer_cache": None, # dict: {segments, duration, elapsed, computed_at}
+        "sortformer_stop":  True, # True = không chạy thread; set False khi start recording
+        "sortformer_run_lock": threading.Lock(),  # serialize NeMo calls (Windows tempdir race)
+        # FIX #13b: streaming WAV writer (chỉ giữ file handle ở _shared, dùng từ main thread)
+        "wav_writer": None,       # wave.Wave_write hoặc None
+        "wav_path": None,         # đường dẫn file đang ghi
+        "wav_lock": threading.Lock(),
+        # FIX #5b: trạng thái finalize chạy nền
+        "finalize_state": {       # main thread đọc, worker thread ghi
+            "running": False,
+            "pct": 0,
+            "msg": "",
+            "result": None,       # dict: {"merged":..., "stats":..., "warning":..., "backend":...}
+            "error": None,
+        },
+        "finalize_lock": threading.Lock(),
     }
 
 _shared = get_shared_resources()
 _AUDIO_QUEUE = _shared["audio_q"]
-_DIAR_QUEUE  = _shared["diar_q"]
-_speaker_windows = _shared["spk_windows"]
-_speaker_lock = _shared["spk_lock"]
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 2b. HELPERS — friendly speaker labels, mic devices, pre-warm
+# ══════════════════════════════════════════════════════════════════════════════
+def _friendly_speaker(raw_label: str, attendees: list[str] | None = None) -> str:
+    """SPEAKER_00 → 'Người nói 1' hoặc tên attendee nếu có sẵn (#9 + #10).
+    Giữ nguyên nếu đã là tên người (đã rename hoặc raw không match)."""
+    if not raw_label or raw_label == "...":
+        return "…"
+    # raw_label dạng SPEAKER_00, SPEAKER_01 ...
+    if raw_label.upper().startswith("SPEAKER_"):
+        try:
+            idx = int(raw_label.split("_", 1)[1])
+        except (ValueError, IndexError):
+            return raw_label
+        if attendees:
+            if 0 <= idx < len(attendees) and attendees[idx].strip():
+                return attendees[idx].strip()
+        return f"Người nói {idx + 1}"
+    return raw_label  # đã là tên người, giữ nguyên
+
+
+def _spk_css_class(label: str) -> str:
+    """Map speaker label → CSS class spk-0..spk-5 (cố định màu theo thứ tự xuất hiện)."""
+    seen = st.session_state.setdefault("l_spk_color_map", {})
+    if label not in seen:
+        seen[label] = f"spk-{len(seen) % 6}" if label != "…" else "spk-x"
+    return seen[label]
+
+
+@st.cache_data(show_spinner=False)
+def _list_input_devices() -> list[tuple[int, str]]:
+    """Liệt kê mic devices của hệ thống (#6). Cache để không quét đi quét lại."""
+    if sd is None:
+        return []
+    try:
+        devices = sd.query_devices()
+    except Exception:
+        return []
+    out = []
+    for i, d in enumerate(devices):
+        if d.get("max_input_channels", 0) > 0:
+            out.append((i, f'{d["name"]}  ({int(d.get("default_samplerate", 0))}Hz)'))
+    return out
+
+
+# ── FIX #13b: streaming WAV writer ─────────────────────────────────────────────
+def _wav_open(sample_rate: int = SAMPLE_RATE) -> str:
+    """Mở file WAV mới ở temp, lưu writer vào _shared. Trả về đường dẫn."""
+    _wav_close()   # đóng file cũ nếu có
+    tmp = tempfile.NamedTemporaryFile(suffix="_live.wav", delete=False)
+    tmp.close()
+    wf = wave.open(tmp.name, "wb")
+    wf.setnchannels(1); wf.setsampwidth(2); wf.setframerate(sample_rate)
+    with _shared["wav_lock"]:
+        _shared["wav_writer"] = wf
+        _shared["wav_path"]   = tmp.name
+    print(f"[WAV] mở stream → {tmp.name}", flush=True)
+    return tmp.name
+
+
+def _wav_append(chunk: np.ndarray) -> None:
+    """Ghi 1 chunk int16 vào file WAV đang mở. No-op nếu chưa mở."""
+    with _shared["wav_lock"]:
+        wf = _shared.get("wav_writer")
+        if wf is None:
+            return
+        try:
+            wf.writeframes(chunk.tobytes())
+        except Exception as e:
+            print(f"[WAV] writeframes lỗi: {e}", flush=True)
+
+
+def _wav_close() -> str | None:
+    """Đóng file WAV. Trả về path (hoặc None nếu chưa mở)."""
+    with _shared["wav_lock"]:
+        wf   = _shared.get("wav_writer")
+        path = _shared.get("wav_path")
+        if wf is None:
+            return None
+        try: wf.close()
+        except: pass
+        _shared["wav_writer"] = None
+    print(f"[WAV] đóng stream ← {path}", flush=True)
+    return path
+
+
+def _wav_path() -> str | None:
+    return _shared.get("wav_path")
+
+
+def _wav_snapshot() -> str | None:
+    """Lấy snapshot WAV (header hợp lệ) của recording đang ghi — KHÔNG đóng writer.
+    Trick: writer chỉ append PCM vào sau byte 44, nên ta:
+      1) flush + fsync writer hiện tại
+      2) đọc số byte PCM đã ghi (_datawritten)
+      3) đọc trực tiếp PCM từ disk
+      4) đóng gói lại thành WAV mới có header hợp lệ → trả path tạm
+    Dùng cho incremental Sortformer khi user đang thu.
+    """
+    with _shared["wav_lock"]:
+        wf = _shared.get("wav_writer")
+        path = _shared.get("wav_path")
+        if wf is None or path is None:
+            return None
+        try:
+            wf._file.flush()
+            os.fsync(wf._file.fileno())
+        except Exception:
+            pass
+        data_written = getattr(wf, "_datawritten", 0)
+
+    if data_written < SAMPLE_RATE * 2 * 5:   # < 5s audio → quá ngắn
+        return None
+    try:
+        with open(path, "rb") as f:
+            f.seek(44)
+            pcm = f.read(data_written)
+    except Exception as e:
+        print(f"[snapshot] đọc PCM lỗi: {e}", flush=True)
+        return None
+    if not pcm:
+        return None
+
+    tmp = tempfile.NamedTemporaryFile(suffix="_snap.wav", delete=False)
+    tmp.close()
+    try:
+        with wave.open(tmp.name, "wb") as wf2:
+            wf2.setnchannels(1); wf2.setsampwidth(2); wf2.setframerate(SAMPLE_RATE)
+            wf2.writeframes(pcm)
+    except Exception as e:
+        print(f"[snapshot] ghi WAV mới lỗi: {e}", flush=True)
+        try: os.unlink(tmp.name)
+        except: pass
+        return None
+    return tmp.name
+
+
+def _run_sortformer_incremental_thread(sample_rate: int = SAMPLE_RATE) -> None:
+    """Background: chạy Sortformer liên tục trên snapshot WAV.
+    Sau mỗi pass, cache `_shared['sortformer_cache']` để finalize tận dụng.
+
+    Sortformer trên CPU chạy ~3× real-time → nếu đợi đến lúc bấm Hoàn thiện
+    mới chạy thì user phải ngồi chờ 5 phút cho 100s audio. Chạy NỀN từ lúc thu
+    để khi bấm Hoàn thiện thì kết quả đã có sẵn (hoặc gần xong).
+    """
+    print("[SortformerInc] background thread start", flush=True)
+    # Warm-up: đợi 15s đầu để có ít audio rồi mới chạy pass 1
+    for _ in range(15):
+        if _shared.get("sortformer_stop"): return
+        time.sleep(1.0)
+
+    while not _shared.get("sortformer_stop"):
+        snap = _wav_snapshot()
+        if not snap:
+            time.sleep(3.0); continue
+        try:
+            with wave.open(snap, "rb") as wf:
+                dur = wf.getnframes() / float(wf.getframerate() or sample_rate)
+            if dur < 10.0:
+                continue
+            t0 = time.time()
+            print(f"[SortformerInc] pass start: {dur:.1f}s audio …", flush=True)
+            from core.diarization.sortformer_bridge import diarize_file_sortformer
+            # FIX: serialize NeMo calls — đồng thời inc + finalize gây WinError 267 trên temp dir
+            with _shared["sortformer_run_lock"]:
+                segments = diarize_file_sortformer(wav_path=snap, num_speakers=None)
+            elapsed = time.time() - t0
+            _shared["sortformer_cache"] = {
+                "segments":    segments,
+                "duration":    dur,
+                "elapsed":     elapsed,
+                "computed_at": time.time(),
+            }
+            n_spk = len(set(getattr(s, "speaker", "?") for s in segments))
+            print(f"[SortformerInc] ✓ cached: {len(segments)} segs, {n_spk} spk, "
+                  f"{dur:.1f}s audio, took {elapsed:.1f}s", flush=True)
+        except Exception as e:
+            print(f"[SortformerInc] pass lỗi: {e}", flush=True)
+            time.sleep(5.0)
+        finally:
+            try: os.unlink(snap)
+            except: pass
+        # Không sleep giữa các pass — recording vẫn đang dài ra, chạy tiếp ngay.
+    print("[SortformerInc] background thread exit", flush=True)
+
+
+# ── FIX #5b: async finalize worker (chạy nền, không block UI) ─────────────────
+def _finalize_worker(wav_path: str, turns_snapshot: list, attendees_text: str,
+                     final_backend_env: str, debug: bool) -> None:
+    """Worker thread: chạy toàn bộ pipeline Hoàn thiện, đẩy progress + kết quả qua _shared.
+
+    KHÔNG được gọi st.* (không có script context). Communication qua _shared['finalize_state'].
+    """
+    state = _shared["finalize_state"]
+    lock  = _shared["finalize_lock"]
+
+    def _prog(pct: int, msg: str):
+        with lock:
+            state["pct"] = max(state["pct"], int(pct))
+            state["msg"] = msg
+        print(f"[Finalize {pct:3d}%] {msg}", flush=True)
+
+    try:
+        _prog(5, "📼 Đang chuẩn bị âm thanh cuộc họp...")
+        from core.diarizer import SpeakerSegment, get_speaker_stats
+        from core.aligner import align, merge_consecutive, smooth_short_turns, rename_turns
+        from core.punctuation_restorer import restore
+        from collections import Counter as _Counter
+
+        def _spk_dist(segs):
+            return dict(_Counter(getattr(s, "speaker", s[2] if isinstance(s, tuple) else "?") for s in segs))
+
+        if not wav_path or not os.path.exists(wav_path):
+            raise RuntimeError("Không tìm thấy file âm thanh đã thu.")
+        with wave.open(wav_path, "rb") as _wf:
+            audio_dur_sec = _wf.getnframes() / float(_wf.getframerate() or SAMPLE_RATE)
+
+        # Sortformer-only: không còn pyannote/diart fallback. 4-speaker cap là giới hạn cứng.
+        segments = None
+        used_backend = "sortformer"
+        warning = None
+
+        # 1) Ưu tiên cache từ thread incremental đã chạy nền lúc thu
+        cache = _shared.get("sortformer_cache")
+        if cache and cache.get("duration", 0) >= audio_dur_sec * 0.5:
+            coverage = cache["duration"] / audio_dur_sec
+            if coverage < 0.85 and audio_dur_sec < 600:
+                _prog(20, f"⏳ Đợi pass Sortformer incremental cuối hoàn tất (đang cover {coverage*100:.0f}%)...")
+                t_wait = time.time()
+                while time.time() - t_wait < 90.0:
+                    time.sleep(2.0)
+                    new_cache = _shared.get("sortformer_cache")
+                    if new_cache and new_cache.get("computed_at", 0) > cache.get("computed_at", 0):
+                        cache = new_cache
+                        coverage = cache["duration"] / audio_dur_sec
+                        if coverage >= 0.85:
+                            break
+            segments = cache["segments"]
+            used_backend = f"sortformer-incremental ({coverage*100:.0f}%)"
+            _prog(40, f"⚡ Tái sử dụng Sortformer incremental (cover {coverage*100:.0f}% audio, "
+                      f"đã tính {cache['elapsed']:.0f}s nền) ...")
+
+        # 2) Không có cache hợp lệ → chạy Sortformer trên toàn bộ recording
+        if segments is None:
+            _prog(15, "🧠 Sortformer đang phân tách người nói (SOTA, tối đa 4 người)...")
+            from core.diarization.sortformer_bridge import diarize_file_sortformer
+            with _shared["sortformer_run_lock"]:
+                segments = diarize_file_sortformer(wav_path=wav_path, num_speakers=None)
+            used_backend = "sortformer"
+
+        # 3) Cảnh báo (không fail) khi attendees > 4 — Sortformer cap 4.
+        expected_attendees = [n for n in attendees_text.splitlines() if n.strip()]
+        if len(expected_attendees) > 4:
+            warning = (f"Bạn nhập {len(expected_attendees)} thành viên nhưng Sortformer chỉ "
+                       f"hỗ trợ tối đa 4 người nói. Các thành viên dư sẽ bị gộp.")
+
+        if not segments:
+            raise RuntimeError(
+                "Sortformer không trả ra segment nào. Kiểm tra file âm thanh có hợp lệ "
+                "(WAV 16kHz mono, >= vài giây speech) và NeMo cài đúng trong sortformer_env."
+            )
+
+        n_spk_final = len(set(_spk_dist(segments)))
+        _prog(60, f"✓ Phân tách xong: {n_spk_final} người nói ({used_backend}). Khôi phục dấu câu...")
+
+        raw = " ".join(t.text for t in turns_snapshot if t.text.strip())
+        full_text = restore(raw.lower())
+
+        _prog(80, "🧩 Đang ép khớp thời gian (forced-align)...")
+        # FIX: truyền live_turns vào để align có fallback "pseudo-word-timestamps"
+        # tốt hơn ratio-based khi stable-ts không có sẵn trong env (env Sortformer).
+        aligned = align(segments=segments, full_text=full_text, wav_path=wav_path,
+                        language="vi", use_forced_align=True, gap_limit=1.5,
+                        live_turns=turns_snapshot)
+        _prog(92, "🪡 Đang gộp lượt nói liên tiếp...")
+        merged = merge_consecutive(aligned, gap_limit=1.5)
+        merged = smooth_short_turns(merged, max_words=4, max_dur=1.2, gap_limit=1.5)
+
+        # Auto-rename
+        attendees_list = [n.strip() for n in attendees_text.splitlines() if n.strip()]
+        raw_speakers_sorted = sorted({t.speaker for t in merged if t.speaker.upper().startswith("SPEAKER_")},
+                                     key=lambda s: int(s.split("_")[1]) if s.split("_")[1].isdigit() else 999)
+        rename_map = {}
+        for i, raw_s in enumerate(raw_speakers_sorted):
+            rename_map[raw_s] = attendees_list[i] if (attendees_list and i < len(attendees_list)) else f"Người nói {i + 1}"
+        if rename_map:
+            merged = rename_turns(merged, rename_map)
+            segments = [SpeakerSegment(speaker=rename_map.get(s.speaker, s.speaker), start=s.start, end=s.end)
+                        for s in segments]
+
+        with lock:
+            state["result"] = {
+                "merged":       merged,
+                "stats":        get_speaker_stats(segments),
+                "warning":      warning,
+                "backend":      used_backend,
+                "n_speakers":   n_spk_final,
+            }
+            state["pct"] = 100
+            state["msg"] = f"✅ Hoàn tất! {len(merged)} lượt · {n_spk_final} người nói · {used_backend}"
+            state["running"] = False
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        with lock:
+            state["error"] = f"{type(e).__name__}: {e}"
+            state["running"] = False
+
+
+def _sortformer_disabled() -> bool:
+    """Cờ tắt hoàn toàn Sortformer — đặt SORTFORMER_DISABLED=1 trong .env nếu NeMo
+    crash trên máy này (DLL/CUDA/ABI mismatch). App sẽ skip cả prewarm, incremental
+    thread, lẫn finalize path → đi thẳng pyannote. Giúp port app sang máy khác
+    không có NeMo hoạt động."""
+    return os.getenv("SORTFORMER_DISABLED", "0").strip() in ("1", "true", "yes")
+
+
+def _prewarm_sortformer_async():
+    """FIX #5: pre-load Sortformer subprocess ở background → bấm 'Hoàn thiện' không chờ cold-start."""
+    if _sortformer_disabled():
+        print("[Prewarm] ⏭️ Bỏ qua: SORTFORMER_DISABLED=1", flush=True)
+        return
+    if _shared.get("sortformer_warm"):
+        return
+    _shared["sortformer_warm"] = True  # đặt true ngay để tránh spawn nhiều thread
+
+    def _worker():
+        try:
+            from core.diarization.sortformer_bridge import diarize_file_sortformer
+            # Bơm 1s silence vào để model load + JIT compile mà không tốn CPU thật
+            import wave, tempfile as _tf
+            tmp = _tf.NamedTemporaryFile(suffix="_warm.wav", delete=False)
+            try:
+                with wave.open(tmp.name, "wb") as wf:
+                    wf.setnchannels(1); wf.setsampwidth(2); wf.setframerate(16000)
+                    wf.writeframes((np.zeros(16000, dtype=np.int16)).tobytes())
+                diarize_file_sortformer(wav_path=tmp.name, num_speakers=None)
+                print("[Prewarm] ✅ Sortformer subprocess sẵn sàng.", flush=True)
+            finally:
+                try: os.unlink(tmp.name)
+                except: pass
+        except Exception as e:
+            print(f"[Prewarm] ⚠️ Sortformer chưa pre-warm được ({e}). Sẽ load khi bấm Hoàn thiện.",
+                  flush=True)
+
+    t = threading.Thread(target=_worker, daemon=True, name="sortformer-prewarm")
+    add_script_run_ctx(t); t.start()
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 3. PAGE CONFIG & CSS 
 # ══════════════════════════════════════════════════════════════════════════════
 st.set_page_config(
-    page_title = "Live Mode — Hỏi Cung",
+    page_title = "Smart Meeting — Live",
     page_icon  = "🎙️",
     layout     = "wide",
     initial_sidebar_state = "expanded",
@@ -114,6 +465,22 @@ st.markdown("""
         display: inline-block; width: 8px; height: 8px; border-radius: 50%;
         background: #e8520a; animation: rec-blink 1.2s ease-in-out infinite; margin-right: 6px;
     }
+    /* Speaker pill (live transcript) */
+    .spk-pill {
+        display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:10px;
+        padding:1px 8px; border-radius:10px; font-weight:600; letter-spacing:0.5px;
+        white-space:nowrap; margin-right:8px;
+    }
+    .spk-0 { background:rgba(232,82,10,0.15);  color:#e8520a; border:1px solid rgba(232,82,10,0.3);}
+    .spk-1 { background:rgba(77,166,232,0.15); color:#4da6e8; border:1px solid rgba(77,166,232,0.3);}
+    .spk-2 { background:rgba(46,139,46,0.15);  color:#2e8b2e; border:1px solid rgba(46,139,46,0.3);}
+    .spk-3 { background:rgba(180,90,200,0.15); color:#b45ac8; border:1px solid rgba(180,90,200,0.3);}
+    .spk-4 { background:rgba(220,160,40,0.15); color:#dca028; border:1px solid rgba(220,160,40,0.3);}
+    .spk-5 { background:rgba(160,80,40,0.15);  color:#a05028; border:1px solid rgba(160,80,40,0.3);}
+    .spk-x { background:rgba(128,128,128,0.15);color:#888;    border:1px solid rgba(128,128,128,0.3);}
+    /* VU meter */
+    .vu-track { background:rgba(128,128,128,0.15); border-radius:3px; height:6px; overflow:hidden; }
+    .vu-fill  { background:linear-gradient(90deg,#2e8b2e 0%,#dca028 70%,#e8520a 95%); height:100%; transition:width 80ms linear; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -122,22 +489,21 @@ with st.sidebar:
     <div style="padding:16px 0 24px;">
         <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;
                     letter-spacing:3px;text-transform:uppercase;color:#e8520a;
-                    margin-bottom:8px;">// HỆ THỐNG</div>
-        <div style="font-size:18px;font-weight:700;color:var(--text-color);">Trợ lý Hỏi Cung</div>
+                    margin-bottom:8px;">// SMART MEETING</div>
+        <div style="font-size:18px;font-weight:700;color:var(--text-color);">Trợ lý Cuộc họp</div>
         <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;
-                    color:var(--text-color);opacity:0.6;margin-top:6px;">STT · NPU DIARIZATION · DOCX</div>
+                    color:var(--text-color);opacity:0.6;margin-top:6px;">STT · DIARIZATION · SUMMARY</div>
     </div>
     """, unsafe_allow_html=True)
     st.divider()
-    st.page_link("app.py",                label="🏠  Trang chủ")
-    st.page_link("pages/1_Batch_Mode.py", label="📁  Xử lý File Audio/Video")
-    st.page_link("pages/2_Live_Mode.py",  label="🎙️  Live Mode")
+    st.page_link("app.py",               label="🏠  Trang chủ")
+    st.page_link("pages/2_Live_Mode.py", label="🎙️  Smart Meeting (Live)")
 
 st.markdown("""
 <div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;
             color:var(--text-color);opacity:0.7;padding-bottom:12px;border-bottom:1px solid rgba(128,128,128,0.2);
             margin-bottom:20px;">
-    🎙️  Thu âm Trực tiếp — Live Mode (NPU Accelerated)
+    🎙️  Smart Meeting — Ghi âm Cuộc họp Trực tiếp
 </div>
 """, unsafe_allow_html=True)
 
@@ -151,25 +517,24 @@ if not LIVE_ENV_READY:
 @st.cache_resource(show_spinner=False)
 def _get_zipformer():
     print("⏳ Loading Zipformer...")
+    # FIX #14 (v2): cắt aggressive hơn cho hội thoại rapid-fire.
+    # rule1 silence-ngắn  1.2 → 0.7  (catch interruption khi gap ngắn)
+    # rule2 silence-dài   0.8 → 0.4  (kết thúc câu hoàn chỉnh nhanh hơn)
+    # rule3 độ dài utt   14  → 10   (force flush nếu utterance kéo dài quá)
+    # → giảm hiện tượng "monster turn" 100+ từ nuốt nhiều speaker.
     r = sherpa_onnx.OnlineRecognizer.from_transducer(
         tokens=TOKENS_PATH, encoder=ENCODER_PATH, decoder=DECODER_PATH, joiner=JOINER_PATH,
         num_threads=2, sample_rate=SAMPLE_RATE, feature_dim=80,
-        enable_endpoint_detection=True, rule1_min_trailing_silence=2.4,
-        rule2_min_trailing_silence=1.2, rule3_min_utterance_length=20,
+        enable_endpoint_detection=True, rule1_min_trailing_silence=0.7,
+        rule2_min_trailing_silence=0.4, rule3_min_utterance_length=10,
     )
     return r
 
 with st.spinner("Đang nạp mô hình STT..."): recognizer = _get_zipformer()
 
+# FIX #5: pre-warm Sortformer subprocess ở background khi app khởi động
+_prewarm_sortformer_async()
 
-@st.cache_resource(show_spinner=False)
-def _get_whisper_finalizer():
-    """Whisper (chính xác) để re-transcribe khi 'Hoàn thiện' — load 1 lần, cache.
-    Chỉ dùng khi LIVE_FINAL_STT=whisper."""
-    print("⏳ Loading Whisper (final-pass STT)...", flush=True)
-    from core.transcriber import load_model
-    _, app = load_model()
-    return app
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 5. SESSION STATE
@@ -177,10 +542,18 @@ def _get_whisper_finalizer():
 _defaults = {
     "l_recording": False, "l_finished": False, "l_diar_done": False, "l_renamed": False,
     "l_stream_ref": None, "l_asr_stream": None,
-    "l_turns": [], "l_stats": {}, "l_name_map": {}, "l_raw_audio": [], "l_diart_ref": None,
+    "l_turns": [], "l_stats": {}, "l_name_map": {}, "l_raw_audio": [],
     "l_n_chunks": 0, "l_partial": "", "l_session_name": "", "l_show_full": False,
-    "l_summary": "", "l_summary_done": False, "l_prev_window_count": 0, "l_target_spk": 2,
+    "l_summary": "", "l_summary_done": False,
     "l_file_mode": False,
+    # FIX #6 #8 #9 #13 #16
+    "l_mic_device": None,         # mic device index (None = default)
+    "l_paused": False,            # đang tạm dừng?
+    "l_attendees": "",            # danh sách thành viên (textarea, 1 tên/dòng)
+    "l_finalize_count": 0,        # đếm lần Hoàn thiện đã chạy
+    "l_finalize_backend": "auto", # auto/sortformer/pyannote
+    "l_ram_warned": False,        # đã cảnh báo RAM chưa
+    "l_spk_color_map": {},        # map nhãn → CSS class màu
 }
 for k, v in _defaults.items():
     if k not in st.session_state: st.session_state[k] = v
@@ -196,26 +569,21 @@ def _audio_callback(indata, frames, time_info, status):
     streamer được lấy từ _shared (singleton cache_resource), không phải session_state.
     """
     chunk = (indata[:, 0] * 32767).astype(np.int16)
-    _AUDIO_QUEUE.put(chunk.copy())   # ASR thread sẽ append vào l_raw_audio
-
-    # Diarization fan-out theo backend live:
-    #   diart → feed streamer | npu → queue HTTP | none/off → KHÔNG diarize live
-    #   (none: speaker gán hết ở final-pass Sortformer khi bấm Hoàn thiện)
-    if DIARIZATION_BACKEND == "diart":
-        diart_ref = _shared.get("diart_ref")
-        if diart_ref is not None:
-            diart_ref.feed(chunk.copy())
-    elif DIARIZATION_BACKEND == "npu":
-        _DIAR_QUEUE.put(chunk.copy())
-    # else (none/off): bỏ qua — không diarize trong lúc thu
+    # FIX #7: cập nhật peak level cho VU meter (smoothed)
+    try:
+        peak = float(np.max(np.abs(indata[:, 0]))) if indata.size else 0.0
+        prev = _shared.get("audio_peak", 0.0)
+        _shared["audio_peak"] = max(peak, prev * 0.75)  # decay nhanh khi im lặng
+    except Exception:
+        pass
+    _AUDIO_QUEUE.put(chunk.copy())   # ASR thread → Zipformer; phân speaker ở finalize
 
 
 def _stream_file_thread(wav_path: str, sample_rate: int = 16000, realtime: bool = True):
     """Bơm 1 file WAV vào pipeline GIỐNG HỆT mic — để test trước khi thu thật.
 
-    Chạy trong thread nền → KHÔNG truy cập st.session_state. Đẩy chunk vào cùng
-    _AUDIO_QUEUE (ASR) + diart/_DIAR_QUEUE (diarization) như _audio_callback.
-    Tự downmix stereo → mono. realtime=True phát ở tốc độ 1× như mic thật.
+    Chạy trong thread nền → KHÔNG truy cập st.session_state. Đẩy chunk vào _AUDIO_QUEUE
+    để ASR (Zipformer) consume. Tự downmix stereo → mono. realtime=True phát 1× như mic.
     """
     import wave as _wave
     try:
@@ -245,12 +613,6 @@ def _stream_file_thread(wav_path: str, sample_rate: int = 16000, realtime: bool 
         if n_ch == 2:
             chunk = chunk.reshape(-1, 2).mean(axis=1).astype(np.int16)
         _AUDIO_QUEUE.put(chunk.copy())
-        if DIARIZATION_BACKEND == "diart":
-            ref = _shared.get("diart_ref")
-            if ref is not None:
-                ref.feed(chunk.copy())
-        else:
-            _DIAR_QUEUE.put(chunk.copy())
         if realtime:
             time.sleep(chunk_dt)
 
@@ -259,156 +621,59 @@ def _stream_file_thread(wav_path: str, sample_rate: int = 16000, realtime: bool 
     print("[FileStream] ✅ Đã đọc hết file", flush=True)
 
 
-def _run_diart_thread(sample_rate: int = 16000, num_speakers: int = 2):
-    """Làn 2: Gửi tối đa 60s âm thanh gần nhất lên NPU Server để ID đồng nhất và không bị tràn RAM"""
-    import io
-    import wave
-    import base64
-    import requests
-    import numpy as np
-
-    STEP_SEC       = 5.0
-    step_frames    = int(sample_rate * STEP_SEC)
-    
-    # GIỚI HẠN NGỮ CẢNH: Chỉ gửi tối đa 60 giây gần nhất để chống lỗi 400 Bad Request
-    MAX_CONTEXT_SEC = 60.0 
-    max_context_frames = int(sample_rate * MAX_CONTEXT_SEC)
-    
-    full_audio = []
-    accumulated_frames = 0
-    last_processed_frames = 0
-
-    _npu_log("[NPU Thread] Bắt đầu hoạt động")
-    while True:
-        try:
-            chunk = _DIAR_QUEUE.get(timeout=2.0)
-        except _queue_module.Empty:
-            continue
-            
-        if chunk is None:
-            _npu_log("[NPU Thread] Nhận tín hiệu kết thúc")
-            break
-            
-        full_audio.append(chunk)
-        accumulated_frames += len(chunk)
-        
-        if (accumulated_frames - last_processed_frames) >= step_frames:
-            # 1. Ghép toàn bộ âm thanh hiện có
-            audio_i16 = np.concatenate(full_audio)
-            offset_sec = 0.0
-            
-            # 2. CẮT TỈA: Nếu âm thanh dài hơn 60s, chỉ lấy 60s cuối cùng
-            if len(audio_i16) > max_context_frames:
-                # Lưu lại mốc thời gian bị cắt đi để bù trừ (offset) sau này
-                offset_sec = (len(audio_i16) - max_context_frames) / sample_rate
-                audio_i16 = audio_i16[-max_context_frames:]
-            
-            try:
-                wav_io = io.BytesIO()
-                with wave.open(wav_io, 'wb') as wf:
-                    wf.setnchannels(1)
-                    wf.setsampwidth(2)
-                    wf.setframerate(sample_rate)
-                    wf.writeframes(audio_i16.tobytes())
-                
-                b64_audio = base64.b64encode(wav_io.getvalue()).decode('utf-8')
-                data_url = f"data:audio/wav;base64,{b64_audio}"
-                
-                payload = {
-                    "file": data_url, 
-                    "audio": data_url,
-                    "model": "NexaAI/Pyannote-NPU",
-                    "num_speakers": num_speakers
-                }
-                
-                # TĂNG TIMEOUT LÊN 45 GIÂY để Python không vội vàng ngắt kết nối
-                response = requests.post(NPU_API_URL, json=payload, timeout=45.0)
-                
-                if response.status_code == 200:
-                    results = response.json()
-                    segments = results.get("Segments", [])
-                    
-                    if segments:
-                        new_windows = []
-                        for seg in segments:
-                            # 3. BÙ TRỪ THỜI GIAN: Cộng thêm khoảng thời gian đã cắt (offset) 
-                            # để tọa độ map chính xác với STT của hệ thống
-                            abs_start = round(offset_sec + seg['StartTime'], 2)
-                            abs_end   = round(offset_sec + seg['EndTime'], 2)
-                            label     = seg['SpeakerLabel']
-                            new_windows.append((abs_start, abs_end, label))
-                            
-                        with _speaker_lock:
-                            # Không clear toàn bộ nữa, chỉ cập nhật/ghi đè các đoạn trong khoảng 60s gần nhất
-                            # Lọc bỏ các windows cũ nằm trong vùng thời gian đang xét
-                            current_windows = [w for w in _speaker_windows if w[1] <= offset_sec]
-                            current_windows.extend(new_windows)
-                            
-                            _speaker_windows.clear()
-                            _speaker_windows.extend(current_windows)
-                            
-                else:
-                    _npu_log(f"[NPU Thread] Lỗi API ({response.status_code}): {response.text[:100]}")
-                    
-                last_processed_frames = accumulated_frames
-                
-            except requests.exceptions.Timeout:
-                _npu_log("[NPU Thread] NPU đang quá tải, phản hồi chậm hơn 45 giây...")
-            except Exception as e:
-                _npu_log(f"[NPU Thread] Lỗi xử lý/Kết nối: {e}")
+# (Đã xoá: _run_diart_thread — NPU HTTP backend cho diart, không dùng nữa.)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 7. LOGIC GÁN NHÃN NGƯỢC (Retro-Update)
-# ══════════════════════════════════════════════════════════════════════════════
-def _assign_speaker(t_start: float, t_end: float) -> str:
-    """Gán speaker cho 1 câu nói. 3 tầng (mạnh → yếu):
-       1) overlap lớn nhất với speaker window
-       2) speaker tại ĐIỂM GIỮA câu (khi timestamp ước lượng lệch)
-       3) speaker của window GẦN NHẤT theo thời gian (fill_nearest)
-    Tránh trả '...' khi diart đã có dữ liệu → live labels đỡ bị kẹt 1 speaker."""
-    with _speaker_lock:
-        windows = list(_speaker_windows)
-    if not windows:
-        return "..."
+# (Đã loại bỏ live speaker assignment — Sortformer ở Hoàn thiện gán hết.)
 
-    # 1) max overlap
-    best_speaker, best_overlap = None, 0.0
-    for (ws, we, spk) in windows:
-        overlap = max(0.0, min(t_end, we) - max(t_start, ws))
-        if overlap > best_overlap:
-            best_overlap, best_speaker = overlap, spk
-    if best_speaker is not None:
-        return best_speaker
-
-    # 2) speaker tại điểm giữa câu
-    mid = (t_start + t_end) / 2.0
-    for (ws, we, spk) in windows:
-        if ws <= mid <= we:
-            return spk
-
-    # 3) window gần nhất theo khoảng cách thời gian
-    best_speaker, best_dist = None, float("inf")
-    for (ws, we, spk) in windows:
-        dist = max(0.0, max(ws - t_end, t_start - we))
-        if dist < best_dist:
-            best_dist, best_speaker = dist, spk
-    return best_speaker or "..."
-
-def _retro_update_speakers():
-    """Vá tên người nói vào các đoạn Transcript cũ"""
-    turns = st.session_state.get("l_turns", [])
-    updated = 0
-    for t in turns:
-        spk = _assign_speaker(t.start, t.end)
-        # Nếu đã tìm ra nhãn thật và khác với nhãn hiện tại, tiến hành đổi tên
-        if spk != "..." and spk != t.speaker:
-            t.speaker = spk
-            updated += 1
-    return updated
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 8. XỬ LÝ LÀN 1 (STT STREAMING)
 # ══════════════════════════════════════════════════════════════════════════════
+def _prettify_live(text: str) -> str:
+    """Lấy output thô của Zipformer (TOÀN UPPERCASE, không dấu câu) → câu đọc được.
+    Dùng cho mỗi turn live khi commit, KHÔNG cho partial (partial flicker quá nhanh).
+    """
+    if not text:
+        return text
+    try:
+        from core.punctuation_restorer import restore
+        return restore(text.lower())
+    except Exception:
+        # Fallback: lower + capitalize chữ đầu để không bị wall-of-uppercase
+        return text.lower().capitalize()
+
+
+def _zipformer_result_with_ts(z_stream) -> tuple[str, list]:
+    """Lấy (text, per_token_timestamps_giây) từ sherpa-onnx stream.
+
+    Sherpa-onnx trả mỗi token (syllable Vietnamese) 1 timestamp THẬT, không
+    phải ước đoán. Dùng để map vào pyannote/Sortformer segments chính xác
+    hơn ratio-based interpolation.
+
+    Fallback: nếu binding không hỗ trợ JSON method → trả text + list rỗng.
+    """
+    # Thử JSON API trước (newer binding)
+    try:
+        import json
+        s = recognizer.get_result_as_json_string(z_stream)
+        if s:
+            data = json.loads(s)
+            text = (data.get("text") or "").strip()
+            ts = data.get("timestamps") or []
+            return text, list(ts)
+    except Exception:
+        pass
+
+    # Fallback: text-only (legacy binding)
+    try:
+        result = recognizer.get_result(z_stream)
+        text = result if isinstance(result, str) else getattr(result, "text", str(result))
+        return text.strip(), []
+    except Exception:
+        return "", []
+
+
 def _drain_queue() -> tuple[str, list]:
     from core.aligner import AlignedTurn
 
@@ -421,7 +686,8 @@ def _drain_queue() -> tuple[str, list]:
         try: chunk = _AUDIO_QUEUE.get_nowait()
         except _queue_module.Empty: break
 
-        st.session_state.l_raw_audio.append(chunk)
+        # FIX #13b: ghi trực tiếp ra file WAV thay vì giữ list trong RAM
+        _wav_append(chunk)
         st.session_state.l_n_chunks += 1
 
         samples = chunk.astype(np.float32) / 32768.0
@@ -431,33 +697,41 @@ def _drain_queue() -> tuple[str, list]:
             recognizer.decode_stream(z_stream)
 
         if recognizer.is_endpoint(z_stream):
-            text = recognizer.get_result(z_stream).strip()
+            # FIX: lấy text + REAL per-token timestamps từ sherpa-onnx
+            text, ts = _zipformer_result_with_ts(z_stream)
             if text:
+                # t_end là thời điểm CHUNK cuối — chính xác. t_start: ưu tiên timestamp THẬT.
                 t_end = round((st.session_state.l_n_chunks * CHUNK_FRAMES) / SAMPLE_RATE, 2)
-                # Ước lượng độ dài câu bằng số từ (2.5 từ/giây)
-                est_sec = max(0.5, len(text.split()) / 2.5)
-                t_start = round(max(0.0, t_end - est_sec), 2)
-                
-                # Cố gắng gán tên ngay lúc này (có thể là "..." nếu NPU chưa phản hồi kịp)
-                speaker = _assign_speaker(t_start, t_end)
+                if ts:
+                    t_start = round(max(0.0, float(ts[0])), 2)
+                else:
+                    # Fallback ước lượng theo word count (binding cũ không có timestamps)
+                    est_sec = max(0.5, len(text.split()) / 2.5)
+                    t_start = round(max(0.0, t_end - est_sec), 2)
 
+                # Speaker placeholder lúc live — Sortformer ở Hoàn thiện ghi đè.
+                pretty_text = _prettify_live(text)
+                # Map timestamps gốc về tọa độ syllable-level dùng cho aligner
+                # (sherpa-onnx token = Vietnamese syllable, gần khớp 1-1 với word.split())
+                word_starts = [float(t) for t in ts] if ts else None
                 completed.append(AlignedTurn(
-                    speaker = speaker,
-                    start   = t_start,
-                    end     = t_end,
-                    text    = text,
+                    speaker     = "...",
+                    start       = t_start,
+                    end         = t_end,
+                    text        = pretty_text,
+                    word_starts = word_starts,
                 ))
-                print(f"[ASR turn] [{t_start:6.1f}-{t_end:6.1f}] {speaker} "
-                      f"({len(text.split())} từ): {text}", flush=True)
+                ts_tag = f"+{len(ts)}ts" if ts else "no-ts"
+                print(f"[ASR turn] [{t_start:6.1f}-{t_end:6.1f}] "
+                      f"({len(text.split())} từ, {ts_tag}): {text}", flush=True)
             recognizer.reset(z_stream)
 
-    # Nếu NPU ngầm vừa phát hiện thêm cửa sổ thời gian mới, tự động vá (Retro-update)
-    n_windows = len(_speaker_windows)
-    if n_windows > st.session_state.l_prev_window_count:
-        _retro_update_speakers()
-        st.session_state.l_prev_window_count = n_windows
-
-    partial = recognizer.get_result(z_stream).strip()
+    # FIX #1: lower-case partial (chưa restore vì partial flicker quá nhanh, restore tốn CPU)
+    partial, _partial_ts = _zipformer_result_with_ts(z_stream)
+    partial = partial.strip()
+    if partial:
+        partial = partial.lower()
+        partial = partial[:1].upper() + partial[1:] if partial else partial
     return partial, completed
 
 
@@ -480,7 +754,7 @@ def _flush_final_asr() -> None:
             chunk = _AUDIO_QUEUE.get_nowait()
         except _queue_module.Empty:
             break
-        st.session_state.l_raw_audio.append(chunk)
+        _wav_append(chunk)   # FIX #13b
         st.session_state.l_n_chunks += 1
         z.accept_waveform(SAMPLE_RATE, chunk.astype(np.float32) / 32768.0)
 
@@ -492,16 +766,20 @@ def _flush_final_asr() -> None:
     while recognizer.is_ready(z):
         recognizer.decode_stream(z)
 
-    text = recognizer.get_result(z).strip()
+    text, ts = _zipformer_result_with_ts(z)
     if text:
-        t_end   = round((st.session_state.l_n_chunks * CHUNK_FRAMES) / SAMPLE_RATE, 2)
-        est_sec = max(0.5, len(text.split()) / 2.5)
-        t_start = round(max(0.0, t_end - est_sec), 2)
+        t_end = round((st.session_state.l_n_chunks * CHUNK_FRAMES) / SAMPLE_RATE, 2)
+        if ts:
+            t_start = round(max(0.0, float(ts[0])), 2)
+        else:
+            est_sec = max(0.5, len(text.split()) / 2.5)
+            t_start = round(max(0.0, t_end - est_sec), 2)
         st.session_state.l_turns.append(AlignedTurn(
-            speaker = _assign_speaker(t_start, t_end),
-            start   = t_start,
-            end     = t_end,
-            text    = text,
+            speaker     = "...",
+            start       = t_start,
+            end         = t_end,
+            text        = _prettify_live(text),
+            word_starts = [float(t) for t in ts] if ts else None,
         ))
         print(f"[Flush] Commit đoạn cuối ({len(text.split())} từ): {text[:60]}…", flush=True)
 
@@ -511,76 +789,118 @@ def _flush_final_asr() -> None:
 # ══════════════════════════════════════════════════════════════════════════════
 # 9. UI CONTROL PANEL
 # ══════════════════════════════════════════════════════════════════════════════
-st.markdown('<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-color);opacity:0.7;margin-bottom:16px;">① Điều khiển phiên ghi âm</div>', unsafe_allow_html=True)
+st.markdown('<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-color);opacity:0.7;margin-bottom:16px;">① Thiết lập cuộc họp</div>', unsafe_allow_html=True)
 
-c1, c2 = st.columns([2, 1], gap="medium")
-with c1:
-    session_name = st.text_input("Mã phiên / Tên hồ sơ", value=st.session_state.l_session_name or f"LIVE-{time.strftime('%Y%m%d-%H%M')}", disabled=st.session_state.l_recording)
+cfg_c1, cfg_c2 = st.columns([2, 1], gap="medium")
+with cfg_c1:
+    session_name = st.text_input("Tên cuộc họp", value=st.session_state.l_session_name or f"MEETING-{time.strftime('%Y%m%d-%H%M')}", disabled=st.session_state.l_recording)
     if session_name != st.session_state.l_session_name: st.session_state.l_session_name = session_name
-with c2:
-    num_spk = st.number_input("Số người nói dự kiến", min_value=1, max_value=8, value=st.session_state.l_target_spk, disabled=st.session_state.l_recording)
-    if num_spk != st.session_state.l_target_spk: st.session_state.l_target_spk = num_spk
+with cfg_c2:
+    # FIX #6: mic selector
+    devices = _list_input_devices()
+    if devices:
+        device_labels = ["🎙️ Mặc định hệ thống"] + [f"#{i} · {name}" for i, name in devices]
+        device_ids    = [None] + [i for i, _ in devices]
+        try:
+            current_idx = device_ids.index(st.session_state.l_mic_device) if st.session_state.l_mic_device in device_ids else 0
+        except ValueError:
+            current_idx = 0
+        sel = st.selectbox("Thiết bị micro", device_labels, index=current_idx, disabled=st.session_state.l_recording)
+        st.session_state.l_mic_device = device_ids[device_labels.index(sel)]
+    else:
+        st.caption("🎙️ Mic: mặc định")
+
+# FIX #9: pre-load thành viên (optional)
+with st.expander("👥 Danh sách thành viên (tuỳ chọn — gán tên người nói trước)", expanded=False):
+    st.caption("Nhập mỗi thành viên một dòng theo thứ tự dự kiến. Mô hình sẽ tự gán "
+               "`Người nói 1 → tên dòng 1`, `Người nói 2 → tên dòng 2`, v.v. sau khi hoàn thiện.")
+    attendees_text = st.text_area("Tên thành viên", value=st.session_state.l_attendees,
+                                  placeholder="Chủ tọa\nThư ký\nThành viên A\nThành viên B",
+                                  height=110, disabled=st.session_state.l_recording,
+                                  label_visibility="collapsed")
+    if attendees_text != st.session_state.l_attendees:
+        st.session_state.l_attendees = attendees_text
 
 st.markdown("<div style='margin:12px 0 8px;'></div>", unsafe_allow_html=True)
 btn_col1, btn_col2, status_col = st.columns([1, 1, 2], gap="small")
 
 with btn_col1:
     if not st.session_state.l_recording:
-        if st.button("🔴 Bắt đầu Ghi âm", type="primary", use_container_width=True):
+        if st.button("🔴 Bắt đầu Cuộc họp", type="primary", use_container_width=True):
             st.session_state.l_turns = []; st.session_state.l_stats = {}; st.session_state.l_name_map = {}
             st.session_state.l_raw_audio = []; st.session_state.l_n_chunks = 0; st.session_state.l_partial = ""
             st.session_state.l_finished = False; st.session_state.l_diar_done = False; st.session_state.l_renamed = False
             st.session_state.l_summary = ""; st.session_state.l_summary_done = False
-            st.session_state.l_asr_stream = None; st.session_state.l_prev_window_count = 0
+            st.session_state.l_asr_stream = None
             st.session_state.l_file_mode = False   # đây là phiên thu mic, không phải file-test
+            st.session_state.l_paused = False
+            st.session_state.l_finalize_count = 0
+            st.session_state.l_ram_warned = False
+            st.session_state.l_spk_color_map = {}
 
             with _AUDIO_QUEUE.mutex: _AUDIO_QUEUE.queue.clear()
-            with _DIAR_QUEUE.mutex:  _DIAR_QUEUE.queue.clear()
-            with _speaker_lock:      _speaker_windows.clear()
+            # FIX #13b: mở stream WAV mới (xoá file cũ nếu có)
+            old = _wav_close()
+            if old:
+                try: os.unlink(old)
+                except: pass
+            _wav_open(SAMPLE_RATE)
 
-            # ── Dispatch backend ────────────────────────────────────────
-            if DIARIZATION_BACKEND == "diart":
-                # diart streaming: chạy local, không cần NPU server
-                from core.diarization.streaming import DiartStreamingDiarizer
+            # Live diarization đã loại bỏ — Smart Meeting chỉ phân tách người nói
+            # ở bước Hoàn thiện bằng Sortformer. Lúc thu chỉ chạy Zipformer STT
+            # + ghi WAV ra disk + (optionally) Sortformer incremental nền.
+            print("[LiveMode] Live diarization OFF — speakers will be assigned at finalize", flush=True)
 
-                def _sync_to_speaker_windows(new_windows):
-                    """Diart callback → sync vào _speaker_windows để UI/retro-update đọc."""
-                    with _speaker_lock:
-                        _speaker_windows.clear()
-                        _speaker_windows.extend(new_windows)
+            # Spawn incremental Sortformer thread nền (nếu chưa disabled)
+            if not _sortformer_disabled():
+                _shared["sortformer_stop"]  = False
+                _shared["sortformer_cache"] = None
+                sf_inc = threading.Thread(target=_run_sortformer_incremental_thread,
+                                          kwargs={"sample_rate": SAMPLE_RATE},
+                                          daemon=True, name="sortformer-inc")
+                add_script_run_ctx(sf_inc); sf_inc.start()
+                print("[LiveMode] Incremental Sortformer thread spawned", flush=True)
 
-                diart_streamer = DiartStreamingDiarizer(
-                    sample_rate  = SAMPLE_RATE,
-                    num_speakers = st.session_state.l_target_spk,
-                    on_update    = _sync_to_speaker_windows,
-                )
-                diart_streamer.start()
-                _shared["diart_ref"] = diart_streamer      # cho audio callback (thread-safe)
-                st.session_state.l_diart_ref = diart_streamer  # cho main thread (stop)
-                print(f"[LiveMode] ✅ Backend = diart (local streaming)", flush=True)
-            elif DIARIZATION_BACKEND == "npu":
-                # NPU HTTP server (Nexa)
-                diart_t = threading.Thread(
-                    target=_run_diart_thread,
-                    args=(SAMPLE_RATE, st.session_state.l_target_spk),
-                    daemon=True, name="npu-worker",
-                )
-                add_script_run_ctx(diart_t)
-                diart_t.start()
-                print(f"[LiveMode] ✅ Backend = npu (HTTP {NPU_API_URL})", flush=True)
-            else:
-                # none/off: KHÔNG diarize lúc thu. Speaker gán hết ở final-pass
-                # (Sortformer) khi bấm Hoàn thiện → chỉ 1 diarizer, không lẫn nhãn.
-                print(f"[LiveMode] ✅ Backend = none (live không diarize; "
-                      f"final-pass = {os.getenv('LIVE_FINAL_BACKEND','recluster')})", flush=True)
-
-            stream = sd.InputStream(samplerate=SAMPLE_RATE, channels=1, dtype="float32", blocksize=CHUNK_FRAMES, callback=_audio_callback)
+            stream = sd.InputStream(
+                samplerate=SAMPLE_RATE, channels=1, dtype="float32",
+                blocksize=CHUNK_FRAMES, callback=_audio_callback,
+                device=st.session_state.l_mic_device,   # FIX #6
+            )
             stream.start()
             st.session_state.l_stream_ref = stream
             st.session_state.l_recording = True
             st.rerun()
     else:
-        if st.button("⏹️ Dừng Ghi âm", use_container_width=True):
+        # FIX #8: nút Pause/Resume (khi đang thu)
+        if st.session_state.l_paused:
+            if st.button("▶️ Tiếp tục", type="primary", use_container_width=True):
+                # Resume: mở lại InputStream
+                try:
+                    stream = sd.InputStream(
+                        samplerate=SAMPLE_RATE, channels=1, dtype="float32",
+                        blocksize=CHUNK_FRAMES, callback=_audio_callback,
+                        device=st.session_state.l_mic_device,
+                    )
+                    stream.start()
+                    st.session_state.l_stream_ref = stream
+                    st.session_state.l_paused = False
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Không mở được mic để tiếp tục: {e}")
+        else:
+            if st.button("⏸️ Tạm dừng", use_container_width=True):
+                if st.session_state.l_stream_ref:
+                    try: st.session_state.l_stream_ref.stop()
+                    except: pass
+                    try: st.session_state.l_stream_ref.close()
+                    except: pass
+                    st.session_state.l_stream_ref = None
+                st.session_state.l_paused = True
+                st.rerun()
+
+with btn_col2:
+    if st.session_state.l_recording:
+        if st.button("⏹️ Kết thúc Cuộc họp", use_container_width=True, key="btn_stop"):
             _shared["file_streaming"] = False   # dừng file-test thread nếu đang chạy
             if st.session_state.l_stream_ref:
                 st.session_state.l_stream_ref.stop()
@@ -589,156 +909,120 @@ with btn_col1:
 
             _flush_final_asr()   # ép commit đoạn text đang dở (partial) → không mất
 
-            # Dừng backend diarization tương ứng
-            if DIARIZATION_BACKEND == "diart" and st.session_state.get("l_diart_ref"):
-                # stop() đợi diart drain + xử lý nốt; trả windows tích luỹ cuối
-                final_windows = st.session_state.l_diart_ref.stop(timeout=60.0)
-                with _speaker_lock:
-                    _speaker_windows.clear()
-                    _speaker_windows.extend(final_windows)
-                st.session_state.l_diart_ref = None
-                _shared["diart_ref"] = None
-            else:
-                _DIAR_QUEUE.put(None)   # sentinel cho NPU worker thread
-
             st.session_state.l_asr_stream = None
             st.session_state.l_recording = False
             st.session_state.l_finished = True
+            st.session_state.l_paused = False
+            _wav_close()   # FIX #13b: đóng file WAV → flush header
+            _shared["sortformer_stop"] = True   # FIX #5c: dừng thread incremental sau pass hiện tại
             st.rerun()
+    else:
+        # Khi đã DỪNG → hiển thị Hoàn thiện. FIX #16: cho phép Re-run.
+        if st.session_state.l_finished and not st.session_state.l_diar_done:
+            _finalize_label = "✅ Hoàn thiện Transcript"
+            _finalize_disabled = False
+        elif st.session_state.l_diar_done:
+            _finalize_label = "🔄 Chạy lại Hoàn thiện"
+            _finalize_disabled = False
+        else:
+            _finalize_label = "✅ Hoàn thiện Transcript"
+            _finalize_disabled = True
+        # Disable nút khi worker đang chạy (FIX #5b)
+        _finalize_state = _shared["finalize_state"]
+        _is_running     = bool(_finalize_state.get("running"))
+        if _is_running:
+            _finalize_disabled = True
+            _finalize_label = "⏳ Đang hoàn thiện..."
 
-with btn_col2:
-    # Nút Hoàn thiện: Tái sử dụng kết quả siêu chuẩn của NPU để làm sạch văn bản
-    btn_finalize_disabled = not st.session_state.l_finished or st.session_state.l_diar_done
-    if st.button("✅ Hoàn thiện Transcript", disabled=btn_finalize_disabled, use_container_width=True):
-        with st.spinner("Đang ép khớp thời gian (Align) và khôi phục dấu câu..."):
-            _retro_update_speakers() 
-            
-            import wave
-            from core.diarizer import SpeakerSegment, postprocess_segments, get_speaker_stats
-            from core.aligner import align, merge_consecutive
-            from core.punctuation_restorer import restore
+        if st.button(_finalize_label, disabled=_finalize_disabled, type="primary", use_container_width=True, key="btn_finalize"):
+            # FIX #16: reset diar_done để re-run được
+            st.session_state.l_diar_done = False
+            st.session_state.l_renamed = False
+            st.session_state.l_finalize_count += 1
 
-            audio_np = np.concatenate(st.session_state.l_raw_audio).astype(np.int16)
-            tmp_wav = tempfile.NamedTemporaryFile(suffix="_live.wav", delete=False)
-            with wave.open(tmp_wav.name, "wb") as wf:
-                wf.setnchannels(1)
-                wf.setsampwidth(2)
-                wf.setframerate(SAMPLE_RATE)
-                wf.writeframes(audio_np.tobytes())
-
-            # ── Final pass cho diart: re-cluster toàn cục để sửa labels flickery ─
-            # Live diart chỉ thấy past+window → cluster online có thể nhầm.
-            # Final pass dùng pyannote/embedding + agglomerative clustering trên
-            # TOÀN BỘ recording để gán speaker IDs nhất quán.
-            from collections import Counter as _Counter
-            def _spk_dist(segs):
-                return dict(_Counter(getattr(s, "speaker", s[2] if isinstance(s, tuple) else "?") for s in segs))
-
-            # LIVE_FINAL_BACKEND=sortformer → bỏ qua live windows, diarize lại TOÀN BỘ
-            # recording bằng Sortformer (SOTA, như WhisperLiveKit). Chất lượng cao nhất.
-            _FINAL_BACKEND = os.getenv("LIVE_FINAL_BACKEND", "recluster").strip().lower()
-
-            if _FINAL_BACKEND == "sortformer":
-                try:
-                    # BRIDGE: gọi sortformer_env qua subprocess (không import NeMo ở app env)
-                    from core.diarization.sortformer_bridge import diarize_file_sortformer
-                    segments = diarize_file_sortformer(
-                        wav_path     = tmp_wav.name,
-                        num_speakers = st.session_state.l_target_spk,
-                    )
-                    print(f"[Finalize] Sortformer final-pass: {len(segments)} segs, "
-                          f"speakers={_spk_dist(segments)}", flush=True)
-                except Exception as e:
-                    print(f"[LiveMode] Sortformer final-pass lỗi → fallback live labels: {e}", flush=True)
-                    segments = [SpeakerSegment(speaker=spk, start=ws, end=we)
-                                for ws, we, spk in _speaker_windows]
-            elif DIARIZATION_BACKEND == "diart":
-                from core.pipeline.postprocess import final_recluster
-                try:
-                    print(f"[Finalize] _speaker_windows: {len(_speaker_windows)} windows, "
-                          f"speakers={_spk_dist(list(_speaker_windows))}", flush=True)
-                    segments = final_recluster(
-                        wav_path     = tmp_wav.name,
-                        windows      = list(_speaker_windows),
-                        num_speakers = st.session_state.l_target_spk,
-                    )
-                    # KHÔNG chạy postprocess_segments ở đây: final_recluster đã cluster
-                    # sạch rồi. postprocess_segments (smoothing A→B→A + ghost-drop) được
-                    # chỉnh cho output pyannote thô → nó XOÁ speaker thiểu số (host-dominant
-                    # → mất guest). Chỉ merge nhẹ đoạn liền kề cùng speaker là đủ.
-                    print(f"[Finalize] Sau recluster: {len(segments)} segs, "
-                          f"speakers={_spk_dist(segments)}", flush=True)
-                except Exception as e:
-                    print(f"[LiveMode] Final re-cluster lỗi, fallback live labels: {e}", flush=True)
-                    segments = [SpeakerSegment(speaker=spk, start=ws, end=we)
-                                for ws, we, spk in _speaker_windows]
-            else:
-                # Lọc nhiễu cửa sổ NPU (path cũ)
-                raw_segs = [SpeakerSegment(speaker=spk, start=ws, end=we) for ws, we, spk in _speaker_windows]
-                segments = postprocess_segments(raw_segs, min_duration=0.5, merge_gap=2.5)
-
-            # ── Văn bản cho transcript cuối ──────────────────────────────────
-            # LIVE_FINAL_STT=whisper → re-transcribe recording bằng Whisper (chính
-            # xác hơn Zipformer live nhiều: câu đầy đủ + dấu câu). Mặc định whisper.
-            _FINAL_STT = os.getenv("LIVE_FINAL_STT", "whisper").strip().lower()
-            if _FINAL_STT == "whisper":
-                try:
-                    from core.transcriber import transcribe_file
-                    app = _get_whisper_finalizer()
-                    wres = transcribe_file(app, tmp_wav.name)
-                    full_text = (wres.get("text") or "").strip()
-                    print(f"[Finalize] Whisper re-transcribe: {len(full_text.split())} từ", flush=True)
-                    if not full_text:  # Whisper rỗng → fallback text live
-                        raise ValueError("Whisper trả text rỗng")
-                except Exception as e:
-                    print(f"[Finalize] Whisper lỗi → dùng text Zipformer live: {e}", flush=True)
-                    raw = " ".join(t.text for t in st.session_state.l_turns if t.text.strip())
-                    full_text = restore(raw.lower())
-            else:
-                raw = " ".join(t.text for t in st.session_state.l_turns if t.text.strip())
-                full_text = restore(raw.lower())
-
-            # DEBUG verbose (bật bằng FINALIZE_DEBUG=1): in text nguồn để so sánh
-            if os.getenv("FINALIZE_DEBUG", "0") == "1":
-                print(f"[Finalize] === FULL_TEXT ({_FINAL_STT}) ===\n{full_text[:600]}\n=== /FULL_TEXT ===",
-                      flush=True)
-
-            # Chạy Aligner để ép thời gian và nối câu
-            aligned = align(
-                segments=segments,
-                full_text=full_text,
-                wav_path=tmp_wav.name,
-                language="vi",
-                use_forced_align=True,
-                gap_limit=1.5
+            # Reset finalize_state + spawn worker (FIX #5b)
+            with _shared["finalize_lock"]:
+                _shared["finalize_state"].update({
+                    "running": True, "pct": 0, "msg": "Khởi động pipeline hoàn thiện...",
+                    "result": None, "error": None,
+                })
+            _worker = threading.Thread(
+                target=_finalize_worker,
+                kwargs={
+                    "wav_path":          _wav_path(),
+                    "turns_snapshot":    list(st.session_state.l_turns),
+                    "attendees_text":    st.session_state.l_attendees,
+                    "final_backend_env": os.getenv("LIVE_FINAL_BACKEND", "sortformer"),
+                    "debug":             os.getenv("FINALIZE_DEBUG", "0") == "1",
+                },
+                daemon=True, name="finalize-worker",
             )
-            merged = merge_consecutive(aligned, gap_limit=1.5)
-            # Gộp turn ngắn bị kẹp (A→b→A) → bớt phân mảnh khi nói nhanh/chồng tiếng
-            from core.aligner import smooth_short_turns
-            merged = smooth_short_turns(merged, max_words=4, max_dur=1.2, gap_limit=1.5)
-            print(f"[Finalize] Sau align+merge+smooth: {len(merged)} turns, "
-                  f"speakers={_spk_dist(merged)}", flush=True)
-            if os.getenv("FINALIZE_DEBUG", "0") == "1":
-                for _i, _t in enumerate(merged[:6]):
-                    print(f"   [turn {_i}] {_t.speaker}: {_t.text[:90]}", flush=True)
-
-            st.session_state.l_turns = merged
-            st.session_state.l_stats = get_speaker_stats(segments)
-            st.session_state.l_diar_done = True
-            
-            try: os.unlink(tmp_wav.name)
-            except: pass
-            
-        st.rerun()
+            add_script_run_ctx(_worker)
+            _worker.start()
+            st.rerun()
 
 with status_col:
     if st.session_state.l_recording:
         dur_sec = (st.session_state.l_n_chunks * CHUNK_FRAMES) / SAMPLE_RATE
-        st.markdown(f'<div style="background:rgba(232,82,10,0.1);border:1px solid #e8520a;border-radius:4px;padding:8px 14px;display:inline-flex;align-items:center;gap:8px;margin-top:4px;"><span class="rec-dot"></span><span style="font-family:monospace;font-size:11px;font-weight:600;color:#e8520a;">REC &nbsp;{int(dur_sec//60):02d}:{int(dur_sec%60):02d} &nbsp;·&nbsp; {len(st.session_state.l_turns)} câu</span></div>', unsafe_allow_html=True)
+        # FIX #7: VU meter (peak level từ _shared, đã smoothed trong callback)
+        peak = float(_shared.get("audio_peak", 0.0))
+        peak_pct = min(100, int(peak * 130))   # boost hệ số để hiển thị rõ hơn
+        if st.session_state.l_paused:
+            badge = (f'<div style="background:rgba(128,128,128,0.1);border:1px solid #888;border-radius:4px;'
+                     f'padding:8px 14px;display:inline-flex;align-items:center;gap:8px;margin-top:4px;">'
+                     f'<span style="font-family:monospace;font-size:11px;font-weight:600;color:#888;">'
+                     f'⏸ TẠM DỪNG &nbsp;{int(dur_sec//60):02d}:{int(dur_sec%60):02d} &nbsp;·&nbsp; {len(st.session_state.l_turns)} lượt</span></div>')
+        else:
+            badge = (f'<div style="background:rgba(232,82,10,0.1);border:1px solid #e8520a;border-radius:4px;'
+                     f'padding:8px 14px;display:inline-flex;align-items:center;gap:8px;margin-top:4px;">'
+                     f'<span class="rec-dot"></span>'
+                     f'<span style="font-family:monospace;font-size:11px;font-weight:600;color:#e8520a;">'
+                     f'REC &nbsp;{int(dur_sec//60):02d}:{int(dur_sec%60):02d} &nbsp;·&nbsp; {len(st.session_state.l_turns)} lượt</span></div>')
+        vu = (f'<div style="margin-top:6px;display:flex;align-items:center;gap:8px;">'
+              f'<span style="font-family:monospace;font-size:9px;color:var(--text-color);opacity:0.6;'
+              f'min-width:24px;">🎤</span>'
+              f'<div class="vu-track" style="flex:1;max-width:260px;"><div class="vu-fill" style="width:{peak_pct}%;"></div></div>'
+              f'<span style="font-family:monospace;font-size:9px;color:var(--text-color);opacity:0.5;'
+              f'min-width:34px;">{peak_pct:>3}%</span></div>')
+        st.markdown(badge + vu, unsafe_allow_html=True)
     elif st.session_state.l_finished and not st.session_state.l_diar_done:
-        st.markdown(f'<div style="font-family:monospace;font-size:11px;color:var(--text-color);opacity:0.8;padding:8px 14px;background:var(--secondary-background-color);border:1px solid rgba(128,128,128,0.3);border-radius:4px;display:inline-block;margin-top:4px;">⏸ Đã dừng &nbsp;·&nbsp; Bấm Hoàn thiện Transcript</div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="font-family:monospace;font-size:11px;color:var(--text-color);opacity:0.8;padding:8px 14px;background:var(--secondary-background-color);border:1px solid rgba(128,128,128,0.3);border-radius:4px;display:inline-block;margin-top:4px;">⏹ Đã kết thúc &nbsp;·&nbsp; Bấm <b>Hoàn thiện Transcript</b></div>', unsafe_allow_html=True)
     elif st.session_state.l_diar_done and not st.session_state.l_summary_done:
-        st.markdown(f'<div style="font-family:monospace;font-size:11px;color:#4da6e8;padding:8px 14px;background:rgba(77,166,232,0.1);border:1px solid #4da6e8;border-radius:4px;display:inline-block;margin-top:4px;">✓ Đã hoàn thiện &nbsp;·&nbsp; {len(st.session_state.l_stats)} người nói &nbsp;·&nbsp; Bấm Tạo Tóm tắt bên dưới</div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="font-family:monospace;font-size:11px;color:#4da6e8;padding:8px 14px;background:rgba(77,166,232,0.1);border:1px solid #4da6e8;border-radius:4px;display:inline-block;margin-top:4px;">✓ Đã hoàn thiện &nbsp;·&nbsp; {len(st.session_state.l_stats)} người nói &nbsp;·&nbsp; Có thể tạo Tóm tắt bên dưới</div>', unsafe_allow_html=True)
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 9A. FIX #5b: ASYNC FINALIZE POLLING — render progress + commit result
+# ══════════════════════════════════════════════════════════════════════════════
+_fs = _shared["finalize_state"]
+with _shared["finalize_lock"]:
+    _fs_running = bool(_fs.get("running"))
+    _fs_pct     = int(_fs.get("pct", 0))
+    _fs_msg     = str(_fs.get("msg", ""))
+    _fs_result  = _fs.get("result")
+    _fs_error   = _fs.get("error")
+
+if _fs_running:
+    # Worker đang chạy — render progress + tự rerun mỗi 500ms
+    st.progress(max(0, min(100, _fs_pct)), text=_fs_msg or "Đang xử lý...")
+    time.sleep(0.5)
+    st.rerun()
+elif _fs_result is not None and not st.session_state.l_diar_done:
+    # Worker xong → commit kết quả vào session_state
+    res = _fs_result
+    st.session_state.l_turns        = res["merged"]
+    st.session_state.l_stats        = res["stats"]
+    st.session_state.l_diar_done    = True
+    if res.get("warning"):
+        st.warning(f"⚠️ {res['warning']}")
+    st.success(f"✅ Hoàn tất — {len(res['merged'])} lượt · {res['n_speakers']} người nói · backend: {res['backend']}")
+    # Clear result để không re-commit
+    with _shared["finalize_lock"]:
+        _fs["result"] = None
+    st.rerun()
+elif _fs_error and not st.session_state.l_diar_done:
+    st.error(f"❌ Lỗi khi hoàn thiện transcript: {_fs_error}")
+    with _shared["finalize_lock"]:
+        _fs["error"] = None
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 9B. TEST BẰNG FILE (chạy thử pipeline với file trước khi thu mic)
@@ -758,31 +1042,29 @@ if not st.session_state.l_recording and not st.session_state.l_finished:
             st.session_state.l_raw_audio = []; st.session_state.l_n_chunks = 0; st.session_state.l_partial = ""
             st.session_state.l_finished = False; st.session_state.l_diar_done = False; st.session_state.l_renamed = False
             st.session_state.l_summary = ""; st.session_state.l_summary_done = False
-            st.session_state.l_asr_stream = None; st.session_state.l_prev_window_count = 0
+            st.session_state.l_asr_stream = None
+            # Reset cờ mới (#8 #13 #16)
+            st.session_state.l_paused = False
+            st.session_state.l_finalize_count = 0
+            st.session_state.l_ram_warned = False
+            st.session_state.l_spk_color_map = {}
 
             with _AUDIO_QUEUE.mutex: _AUDIO_QUEUE.queue.clear()
-            with _DIAR_QUEUE.mutex:  _DIAR_QUEUE.queue.clear()
-            with _speaker_lock:      _speaker_windows.clear()
+            old = _wav_close()
+            if old:
+                try: os.unlink(old)
+                except: pass
+            _wav_open(SAMPLE_RATE)
 
-            # Khởi động backend diarization (giống mic)
-            if DIARIZATION_BACKEND == "diart":
-                from core.diarization.streaming import DiartStreamingDiarizer
-                def _sync_to_speaker_windows(new_windows):
-                    with _speaker_lock:
-                        _speaker_windows.clear(); _speaker_windows.extend(new_windows)
-                ds = DiartStreamingDiarizer(
-                    sample_rate=SAMPLE_RATE,
-                    num_speakers=st.session_state.l_target_spk,
-                    on_update=_sync_to_speaker_windows,
-                )
-                ds.start()
-                _shared["diart_ref"] = ds
-                st.session_state.l_diart_ref = ds
-            else:
-                t = threading.Thread(target=_run_diart_thread,
-                                     args=(SAMPLE_RATE, st.session_state.l_target_spk),
-                                     daemon=True, name="npu-worker")
-                add_script_run_ctx(t); t.start()
+            # File-test mode: chỉ Sortformer incremental ở nền (giống mic mode)
+            if not _sortformer_disabled():
+                _shared["sortformer_stop"]  = False
+                _shared["sortformer_cache"] = None
+                sf_inc = threading.Thread(target=_run_sortformer_incremental_thread,
+                                          kwargs={"sample_rate": SAMPLE_RATE},
+                                          daemon=True, name="sortformer-inc")
+                add_script_run_ctx(sf_inc); sf_inc.start()
+                print("[LiveMode] Incremental Sortformer thread spawned (file-test mode)", flush=True)
 
             # Spawn thread đọc file → bơm vào pipeline
             _shared["file_streaming"] = True
@@ -813,7 +1095,7 @@ if st.session_state.l_diar_done and st.session_state.l_stats:
 
 st.markdown("<hr style='border-color:rgba(128,128,128,0.2);margin:24px 0 16px;'>", unsafe_allow_html=True)
 col_title, col_toggle = st.columns([3, 1])
-with col_title: st.markdown('<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-color);opacity:0.7;margin-bottom:14px;">③ Nội dung phiên hỏi cung</div>', unsafe_allow_html=True)
+with col_title: st.markdown('<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-color);opacity:0.7;margin-bottom:14px;">③ Nội dung cuộc họp</div>', unsafe_allow_html=True)
 with col_toggle:
     if st.session_state.l_turns:
         if st.button("📄 Xem toàn bộ" if not st.session_state.l_show_full else "🔼 Thu gọn", use_container_width=True):
@@ -821,32 +1103,32 @@ with col_toggle:
             st.rerun()
 
 turns = st.session_state.l_turns
+attendees_list = [n.strip() for n in st.session_state.l_attendees.splitlines() if n.strip()]
 if st.session_state.l_recording:
-    # ── Khi THU: chỉ hiện [mốc thời gian] + văn bản realtime, KHÔNG gán người nói.
-    # Phân tách người nói làm ở bước Hoàn thiện (Sortformer) — chính xác hơn,
-    # không giới hạn cứng số người, không nhãn sai nhấp nháy lúc live.
+    # ── Khi THU: hiện nhãn người nói (live, có thể flicker nhẹ) + text, KHÔNG hiện timestamp giả.
     recent = turns[-8:] if len(turns) > 8 else turns
     rows = ""
     for t in recent:
-        ts = f"{int(t.start//60):02d}:{int(t.start%60):02d}"
-        rows += (f'<div style="display:flex;gap:12px;align-items:baseline;padding:6px 0;'
+        # FIX #2 + #10: nhãn người nói thân thiện (Người nói 1, hoặc tên attendee)
+        spk_friendly = _friendly_speaker(t.speaker, attendees_list)
+        spk_class    = _spk_css_class(spk_friendly)
+        # FIX #4: KHÔNG hiện [mm:ss] giả lúc live; sẽ hiện sau khi Hoàn thiện
+        rows += (f'<div style="display:flex;gap:10px;align-items:baseline;padding:6px 0;'
                  f'border-bottom:1px solid rgba(128,128,128,0.1);">'
-                 f'<span style="font-family:monospace;font-size:10px;color:#e8520a;'
-                 f'white-space:nowrap;min-width:44px;">[{ts}]</span>'
+                 f'<span class="spk-pill {spk_class}">{_html.escape(spk_friendly)}</span>'
                  f'<span style="font-size:13px;color:var(--text-color);line-height:1.6;">'
                  f'{_html.escape(t.text)}</span></div>')
 
     partial = st.session_state.l_partial
     if partial:
-        rows += (f'<div style="display:flex;gap:12px;align-items:baseline;padding:6px 0;opacity:0.55;">'
-                 f'<span style="font-family:monospace;font-size:10px;color:#e8520a;'
-                 f'white-space:nowrap;min-width:44px;">[···]</span>'
+        rows += (f'<div style="display:flex;gap:10px;align-items:baseline;padding:6px 0;opacity:0.55;">'
+                 f'<span class="spk-pill spk-x">···</span>'
                  f'<span style="font-size:13px;color:var(--text-color);opacity:0.7;'
                  f'font-style:italic;">{_html.escape(partial)}</span></div>')
 
     empty_msg = '<div style="padding:40px;text-align:center;color:#484f58;font-size:13px;">🎙️ Đang lắng nghe...</div>'
     st.markdown(f'<div style="background:var(--secondary-background-color);border:1px solid rgba(128,128,128,0.2);border-radius:8px;padding:14px 16px;">{rows if rows else empty_msg}</div>', unsafe_allow_html=True)
-    st.caption("⏺ Phiên âm realtime (chưa phân người nói). Người nói sẽ được phân tách khi bấm **Hoàn thiện**.")
+    st.caption("⏺ Phiên âm realtime · người nói sẽ được phân tách bằng Sortformer khi bấm **Hoàn thiện Transcript**.")
 
 elif turns:
     from components.transcript_viewer import full as show_full, preview as show_preview
@@ -861,26 +1143,67 @@ else:
 
 if turns and st.session_state.l_diar_done:
     st.markdown("<hr style='border-color:rgba(128,128,128,0.2);margin:32px 0 16px;'>", unsafe_allow_html=True)
-    st.markdown('<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-color);opacity:0.7;margin-bottom:14px;">⑤ Tóm tắt & Xuất Biên Bản</div>', unsafe_allow_html=True)
 
-    if st.button("🤖 Chạy Tóm tắt Nội dung (NPU Qwen)", use_container_width=True):
-        summary_progress = st.progress(0, text="Khởi động NPU tóm tắt...")
-        def update_progress(pct, msg): summary_progress.progress(max(0, min(100, pct)), text=f"NPU: {msg}")
-        try:
-            from core.test_qwen import summarize
-            result = summarize(st.session_state.l_turns, progress_callback=update_progress)
-            if result.ok:
-                st.session_state.l_summary = result.summary.strip(); st.session_state.l_summary_done = True
-                summary_progress.progress(100, text=f"✅ Đã tóm tắt thành công! ({result.elapsed_sec}s)"); st.success("✅ Đã tóm tắt thành công!")
-            else:
-                summary_progress.empty(); st.error(f"❌ Lỗi khi tóm tắt: {result.error}")
-        except Exception as e: st.error(f"❌ Lỗi hệ thống: {e}")
+    # FIX #12: Copy-to-clipboard transcript dạng plain
+    full_transcript_text = "\n".join(
+        f"[{int(t.start//60):02d}:{int(t.start%60):02d}] {t.speaker}: {t.text}"
+        for t in turns
+    )
+    cp_c1, cp_c2 = st.columns([3, 1])
+    with cp_c1:
+        st.markdown('<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-color);opacity:0.7;margin-bottom:14px;">④ Sao chép & Tóm tắt & Xuất Biên Bản</div>', unsafe_allow_html=True)
+    with cp_c2:
+        with st.popover("📋 Sao chép Transcript", use_container_width=True):
+            st.caption("Bấm vào ô bên dưới, Ctrl+A → Ctrl+C để chép.")
+            st.code(full_transcript_text, language=None)
 
-    st.caption("ℹ️ Tóm tắt là TUỲ CHỌN (cần Qwen/NPU). Bỏ qua vẫn xuất được DOCX "
-               "chứa transcript đầy đủ theo từng người nói.")
+    # FIX #15: Tóm tắt với graceful fallback
+    sum_c1, sum_c2 = st.columns([2, 1])
+    with sum_c1:
+        if st.button("🤖 Tạo Tóm tắt Cuộc họp (NPU Qwen)", use_container_width=True):
+            summary_progress = st.progress(0, text="Khởi động NPU tóm tắt...")
+            def update_progress(pct, msg): summary_progress.progress(max(0, min(100, pct)), text=f"NPU: {msg}")
+            try:
+                from core.test_qwen import summarize
+                result = summarize(st.session_state.l_turns, progress_callback=update_progress)
+                if result.ok:
+                    st.session_state.l_summary = result.summary.strip(); st.session_state.l_summary_done = True
+                    summary_progress.progress(100, text=f"✅ Đã tóm tắt thành công! ({result.elapsed_sec}s)"); st.success("✅ Đã tóm tắt thành công!")
+                else:
+                    summary_progress.empty()
+                    st.warning(f"⚠️ NPU Qwen lỗi: {result.error}. Bạn vẫn có thể xuất DOCX không tóm tắt, hoặc bấm 'Tóm tắt rule-based' bên cạnh.")
+            except Exception as e:
+                st.warning(f"⚠️ Không gọi được Qwen ({type(e).__name__}: {e}). Thử 'Tóm tắt rule-based' bên cạnh, hoặc xuất DOCX không tóm tắt.")
+    with sum_c2:
+        if st.button("📝 Tóm tắt rule-based", use_container_width=True,
+                     help="Không cần NPU — chỉ trích các lượt dài nhất + thống kê người nói."):
+            try:
+                # Rule-based fallback: thống kê + 5 lượt dài nhất
+                from collections import Counter as _C
+                spk_dur = {}
+                for t in st.session_state.l_turns:
+                    d = max(0.0, float(t.end) - float(t.start))
+                    spk_dur[t.speaker] = spk_dur.get(t.speaker, 0.0) + d
+                total = sum(spk_dur.values()) or 1.0
+                lines = ["**TỔNG QUAN CUỘC HỌP**", "", f"Tổng thời lượng: {int(total//60)} phút {int(total%60)} giây", ""]
+                lines.append("**Thời gian phát biểu:**")
+                for spk, d in sorted(spk_dur.items(), key=lambda x: -x[1]):
+                    pct = 100.0 * d / total
+                    lines.append(f"- {spk}: {int(d//60)}m{int(d%60):02d}s ({pct:.0f}%)")
+                lines += ["", "**Một số phát biểu nổi bật:**"]
+                top_turns = sorted(st.session_state.l_turns, key=lambda t: -len(t.text.split()))[:5]
+                for t in top_turns:
+                    lines.append(f"- *{t.speaker}*: {t.text[:200]}{'…' if len(t.text) > 200 else ''}")
+                st.session_state.l_summary = "\n".join(lines)
+                st.session_state.l_summary_done = True
+                st.success("✅ Đã tạo tóm tắt rule-based.")
+            except Exception as e:
+                st.error(f"❌ Lỗi: {e}")
+
+    st.caption("ℹ️ Tóm tắt là TUỲ CHỌN. Bỏ qua vẫn xuất được DOCX chứa transcript đầy đủ theo từng người nói.")
 
     if st.session_state.l_summary_done and st.session_state.l_summary:
-        st.text_area("Bản xem trước Tóm tắt (Sẽ được chèn vào Word):", st.session_state.l_summary, height=200)
+        st.text_area("Bản xem trước Tóm tắt (sẽ được chèn vào Word):", st.session_state.l_summary, height=200)
 
     st.markdown("<div style='margin:16px 0 8px;'></div>", unsafe_allow_html=True)
 
@@ -916,10 +1239,17 @@ if turns and st.session_state.l_diar_done:
 # ══════════════════════════════════════════════════════════════════════════════
 # 11. STREAMLIT EVENT POLL 200ms
 # ══════════════════════════════════════════════════════════════════════════════
-if st.session_state.l_recording:
+if st.session_state.l_recording and not st.session_state.l_paused:
     partial, completed = _drain_queue()
     st.session_state.l_partial = partial
     if completed: st.session_state.l_turns.extend(completed)
+
+    # FIX #13b: âm thanh đã được stream ra disk — không lo RAM. Cảnh báo theo thời lượng.
+    dur_min = (st.session_state.l_n_chunks * CHUNK_FRAMES / SAMPLE_RATE) / 60.0
+    if dur_min > 60 and not st.session_state.l_ram_warned:
+        st.session_state.l_ram_warned = True
+        st.toast(f"ℹ️ Cuộc họp đã chạy {dur_min:.0f} phút. "
+                 f"Bản finalize sẽ tốn ~{int(dur_min * 0.5)}–{int(dur_min)}s xử lý.", icon="ℹ️")
 
     # ── DEBUG verbose terminal (bật bằng LIVE_DEBUG=1 trong .env) ───────────
     if os.getenv("LIVE_DEBUG", "0") == "1":
@@ -927,33 +1257,21 @@ if st.session_state.l_recording:
         if _now - st.session_state.get("_dbg_last", 0) >= 1.0:
             st.session_state["_dbg_last"] = _now
             dur = (st.session_state.l_n_chunks * CHUNK_FRAMES) / SAMPLE_RATE
-            with _speaker_lock:
-                n_win = len(_speaker_windows)
-                spk_set = sorted({w[2] for w in _speaker_windows})
             print(f"[LIVE {dur:6.1f}s] turns={len(st.session_state.l_turns)} "
-                  f"| diart_windows={n_win} speakers={spk_set} "
                   f"| partial({len(partial.split())} từ): {partial[-80:]}", flush=True)
 
     # File-test mode: khi file đọc xong VÀ queue ASR đã drain → tự động dừng
-    # (giống bấm nút "Dừng Ghi âm" cho mic).
     if (st.session_state.l_file_mode
             and _shared.get("file_done")
             and _AUDIO_QUEUE.empty()):
         _shared["file_streaming"] = False
-        _flush_final_asr()   # commit đoạn text cuối trước khi finalize
-        if DIARIZATION_BACKEND == "diart" and st.session_state.get("l_diart_ref"):
-            final_windows = st.session_state.l_diart_ref.stop(timeout=60.0)
-            with _speaker_lock:
-                _speaker_windows.clear()
-                _speaker_windows.extend(final_windows)
-            st.session_state.l_diart_ref = None
-            _shared["diart_ref"] = None
-        else:
-            _DIAR_QUEUE.put(None)
+        _flush_final_asr()
         st.session_state.l_asr_stream = None
         st.session_state.l_recording = False
         st.session_state.l_finished = True
         st.session_state.l_file_mode = False
+        _wav_close()                              # FIX #13b: đóng WAV
+        _shared["sortformer_stop"] = True         # FIX #5c: dừng inc thread
         st.rerun()
 
     time.sleep(0.2)

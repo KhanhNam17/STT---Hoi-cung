@@ -36,13 +36,17 @@ def _get_stable_ts():
 class AlignedTurn:
     """
     1 lượt nói hoàn chỉnh — đơn vị dữ liệu xuyên suốt toàn bộ app.
-    Compatible 100% với v3 (cùng fields, cùng cách dùng).
+
+    word_starts : per-syllable/token start times (giây) lấy từ sherpa-onnx
+                  get_result_as_json_string. None nếu chưa có (cho compat cũ).
+                  Khi có → aligner dùng real timestamps thay vì interpolation.
     """
-    speaker    : str
-    start      : float
-    end        : float
-    text       : str
-    confidence : float = 1.0
+    speaker     : str
+    start       : float
+    end         : float
+    text        : str
+    confidence  : float = 1.0
+    word_starts : list = None  # type: ignore[assignment]
 
 
 @dataclass
@@ -335,6 +339,78 @@ def _find_cut_point(words: List[str], budget: int, slack: int = 8) -> int:
     return min(budget, n)
 
 
+def live_turns_to_word_timestamps(
+    live_turns : List["AlignedTurn"],
+) -> List[WordTimestamp]:
+    """
+    Chuyển danh sách live Zipformer turns → per-word timestamps.
+
+    Mục đích: thay thế forced_align (stable-ts) khi bản đó không có sẵn,
+    nhưng VẪN feed được vào `assign_word_speakers` + `group_words_to_turns`
+    (chung pipeline với forced-align path) thay vì rơi xuống ratio-based
+    chia text trên TOÀN BỘ transcript (rất dễ misassign).
+
+    Vì sao tốt hơn ratio-based-trên-full-text?
+      - `t_end` của Zipformer là MỐC THẬT (vị trí frame khi detect silence).
+      - Ta sửa `t_start` của mỗi live turn = `t_end` của turn trước đó →
+        chuỗi turns liền mạch, KHÔNG overlap (loại trừ bug fake start time).
+      - Trong mỗi turn, chia đều thời gian cho các từ → mỗi từ có 1 cặp
+        (t_start, t_end) gần đúng nhưng không vượt khỏi biên của turn.
+      - Sau đó `assign_word_speakers` map TỪNG TỪ tới pyannote segment có
+        overlap lớn nhất → speaker label đúng theo thời gian thật.
+
+    Hạn chế: nếu 1 live turn của Zipformer chứa LỜI CỦA 2 NGƯỜI NÓI
+    (do không có khoảng lặng ≥ rule1 giữa họ), thì các từ trong turn đó
+    vẫn được chia đều theo thời gian → ranh giới có thể lệch 1-2 từ.
+    Đây là giới hạn của ASR streaming, không phải của alignment.
+    """
+    if not live_turns:
+        return []
+
+    # Sort theo t_end (mốc thật, không phải t_start vốn là ước lượng từ word count)
+    sorted_turns = sorted(live_turns, key=lambda t: t.end)
+
+    # Anchor: t_start của turn n = t_end của turn n-1 (chuỗi liền mạch, không overlap)
+    prev_end = 0.0
+    out: List[WordTimestamp] = []
+    for lt in sorted_turns:
+        words = lt.text.split()
+        if not words:
+            prev_end = lt.end
+            continue
+
+        # ── PATH 1: REAL per-word timestamps từ Zipformer (sherpa-onnx) ─────
+        # Khi có → chính xác đến mức millisecond → assign_word_speakers sẽ chia
+        # turn dài chứa 2+ người nói thành các sub-turn ĐÚNG ranh giới.
+        real_ts = getattr(lt, "word_starts", None) or []
+        if real_ts and len(real_ts) == len(words):
+            for i, w in enumerate(words):
+                ws = real_ts[i]
+                we = real_ts[i + 1] if (i + 1) < len(real_ts) else lt.end
+                # Bảo đảm we >= ws
+                if we < ws:
+                    we = ws + 0.05
+                out.append(WordTimestamp(word=w, start=round(ws, 3), end=round(we, 3)))
+            prev_end = lt.end
+            continue
+
+        # ── PATH 2: fallback synthetic interpolation (khi không có real ts) ─
+        anchored_start = max(prev_end, max(0.0, lt.end - len(words) * 0.6))
+        if anchored_start >= lt.end:
+            anchored_start = max(0.0, lt.end - 0.5)
+        turn_dur = max(0.05, lt.end - anchored_start)
+        per_word = turn_dur / len(words)
+
+        for i, w in enumerate(words):
+            ws = anchored_start + i * per_word
+            we = anchored_start + (i + 1) * per_word
+            out.append(WordTimestamp(word=w, start=round(ws, 3), end=round(we, 3)))
+
+        prev_end = lt.end
+
+    return out
+
+
 def _align_text_only(
     segments  : List[SpeakerSegment],
     full_text : str,
@@ -403,6 +479,7 @@ def align(
     language          : str           = "vi",
     use_forced_align  : bool          = True,   # tắt để debug / fallback
     gap_limit         : float         = 1.5,    # truyền vào group_words_to_turns
+    live_turns        : Optional[List["AlignedTurn"]] = None,   # FIX align quality
 ) -> List[AlignedTurn]:
     """
     Ghép nối text từ Whisper vào pyannote segments.
@@ -473,7 +550,22 @@ def align(
         else:
             logger.warning("[aligner] forced_align trả về [] → fallback")
 
-    # ── Fallback: Ratio-based (v3) ──────────────────────────────────────────
+    # ── Chiến lược 2: live-turns-as-pseudo-words ────────────────────────────
+    # Khi stable-ts không có (env Sortformer không cài được), dùng timestamps
+    # xấp xỉ từ Zipformer live turns để tạo "fake forced alignment" → chạy
+    # vào cùng pipeline assign_word_speakers + group_words_to_turns. Tốt hơn
+    # nhiều so với chia text theo tỷ lệ duration (mất hoàn toàn ngữ cảnh từ).
+    if live_turns:
+        pseudo_words = live_turns_to_word_timestamps(live_turns)
+        if pseudo_words:
+            word_speakers = assign_word_speakers(pseudo_words, segments)
+            turns = group_words_to_turns(word_speakers, gap_limit=gap_limit)
+            if turns:
+                logger.info(f"[aligner] live-turns pseudo-align: {len(turns)} turns "
+                            f"(stable-ts không có sẵn)")
+                return turns
+
+    # ── Fallback cuối: Ratio-based (v3) ─────────────────────────────────────
     logger.info("[aligner] Dùng ratio-based fallback (v3)")
     return _align_text_only(segments, full_text, slack)
 

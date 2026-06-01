@@ -1,76 +1,64 @@
 # requirements-sortformer.txt
 # ─────────────────────────────────────────────────────────────────────────────
-# MÔI TRƯỜNG RIÊNG cho NVIDIA Streaming Sortformer (NeMo).
-# KHÔNG cài chung với stt_uc2_env! NeMo kéo torch mới (vd 2.12) xung đột với
-# torch==2.2.2 mà app (diart/pyannote/qai_hub) cần → vỡ cả 2.
+# SMART MEETING — Live Mode ONLY
 #
-# Tạo env riêng rồi cài file này:
+# 1 env, 1 page: Zipformer STT + NeMo Sortformer diarization + DOCX/summary.
+# KHÔNG còn diart / pyannote / speechbrain / NPU bridge.
+#
+# Tạo env rồi cài file này:
 #   conda create -n sortformer_env python=3.10 -y
 #   conda activate sortformer_env
 #   pip install -r requirements-sortformer.txt
 #
-# ⚠️ NeMo yêu cầu Cython + packaging TRƯỚC. Nếu lệnh trên lỗi, cài 2 bước:
+# ⚠️ NeMo cần Cython + packaging TRƯỚC. Nếu lệnh trên lỗi, cài 2 bước:
 #   pip install Cython packaging
 #   pip install "nemo_toolkit[asr]"
 #   (bản pypi lỗi thì thử main:)
 #   pip install "git+https://github.com/NVIDIA/NeMo.git@main#egg=nemo_toolkit[asr]"
 #
-# Sau khi cài, diarize 1 file (16kHz mono) trong env này:
-#   python core/diarization/sortformer.py path\to\file_16k.wav 2
+# Sau khi cài, chạy app:
+#   streamlit run app.py
 #
-# NeMo tự kéo torch / torchvision / torchaudio khớp nhau + numpy.
+# Trên Windows: nếu NeMo silent-crash (OpenMP conflict) thêm vào .env:
+#   KMP_DUPLICATE_LIB_OK=TRUE
+#
+# NeMo tự kéo torch / torchvision / torchaudio / numpy phù hợp.
 # ─────────────────────────────────────────────────────────────────────────────
 
-# Build deps (NeMo cần trước khi build)
+# ── NeMo Sortformer (final diarization) ────────────────────────────────
+# Build deps NeMo cần trước
 Cython
 packaging
-
-# NeMo ASR (chứa SortformerEncLabelModel) — kéo torch/torchvision/torchaudio khớp
+# NeMo ASR — chứa SortformerEncLabelModel + tự kéo torch/torchaudio/numpy khớp
 nemo_toolkit[asr]
-
-# NeMo speaker/diarization utils cần pyannote.core + pyannote.metrics.
-# Đây là bản NHẸ (numpy/sortedcontainers, KHÔNG có torch) → không xung đột.
-# (khác pyannote.audio vốn kéo torch — KHÔNG cài cái đó ở env này)
+# pyannote.core/metrics chỉ là utility (numpy/sortedcontainers, KHÔNG kéo torch);
+# NeMo dùng để build Annotation/Segments. KHÁC pyannote.audio (đã loại bỏ).
 pyannote.core
 pyannote.metrics
 
-# Đọc/ghi audio
-soundfile
-numpy
+# ── Streaming STT (Zipformer) ──────────────────────────────────────────
+# sherpa-onnx tự bundle onnxruntime; không phụ thuộc torch.
+sherpa-onnx
 
-# ── CHẠY TOÀN BỘ APP trong env này (one-env demo, không cần bridge) ──────────
-# Sortformer native + Zipformer realtime + DOCX, tất cả 1 env.
-streamlit>=1.35.0          # UI
-sounddevice                # thu mic real-time
-sherpa-onnx                # Zipformer streaming STT (realtime) — độc lập torch
-python-docx>=1.1.0         # xuất biên bản
-librosa>=0.10.0            # xử lý audio
+# ── Audio I/O ──────────────────────────────────────────────────────────
+soundfile                  # đọc/ghi WAV (libsndfile bundled)
+sounddevice                # thu mic real-time (portaudio bundled)
+librosa>=0.10.0            # resampling khi cần
+
+# ── UI / app ───────────────────────────────────────────────────────────
+streamlit>=1.35.0          # UI framework
+python-docx>=1.1.0         # xuất biên bản DOCX
 python-dotenv              # đọc .env
-pandas>=2.0.0              # tiện ích UI
+pandas>=2.0.0              # phụ trợ UI
 tqdm
-requests                   # Live Mode import ở top-level
-
-# LƯU Ý:
-#  - Aligner sẽ dùng fallback ratio-based (không cần stable-ts) — đủ cho demo.
-#  - Tóm tắt (Qwen/NPU) là tuỳ chọn; bỏ qua nếu Nexa không chạy.
-
-# ─────────────────────────────────────────────────────────────────────────────
-# (TUỲ CHỌN) Real-time diarization preview với diart
-# diart nhẹ nhãn tạm trong lúc thu; final vẫn Sortformer (chính xác hơn).
-# Bật: DIARIZATION_BACKEND=diart  trong .env
-# Cảnh báo: diart kéo pyannote.audio (claim torch>=2.0); cài trên torch 2.12
-# có thể không hoàn hảo — nếu lỗi, bỏ qua và dùng DIARIZATION_BACKEND=none.
-# ─────────────────────────────────────────────────────────────────────────────
-# diart>=0.9.1
-# scikit-learn>=1.3.0
-# rx>=3.2.0
-
-# ─────────────────────────────────────────────────────────────────────────────
-# (TUỲ CHỌN) NPU Whisper cho final-pass STT chất lượng cao
-# Cài sau khi cài file này, theo lệnh riêng (qai_hub_models có extra):
+requests                   # NeMo HF Hub download
+stable-ts
+# ── (TUỲ CHỌN) Tóm tắt NPU Qwen ─────────────────────────────────────────
+# Bật sau khi cài bằng:
 #   pip install "qai_hub_models[whisper-large-v3-turbo]"
-# Bật: LIVE_FINAL_STT=whisper  trong .env
-# Cảnh báo: trên Snapdragon mới cho lợi NPU; máy thường chạy CPU vẫn được nhưng chậm.
-# Cảnh báo: torch 2.12 có thể không tương thích qai_hub — kiểm tra sau cài.
-# ─────────────────────────────────────────────────────────────────────────────
-# qai_hub>=0.9.0
+# Lưu ý: torch version do NeMo kéo có thể không tương thích qai_hub.
+# Không có Qwen → nút "🤖 Tạo Tóm tắt" sẽ báo lỗi & fallback rule-based.
+
+# ── KHÔNG cài ở env này ─────────────────────────────────────────────────
+# diart, pyannote.audio, speechbrain, k2, spacy, flair, qai_hub
+# → đã loại khỏi pipeline Live Mode. Nếu lỡ cài cũng KHÔNG bị import lúc app start.
